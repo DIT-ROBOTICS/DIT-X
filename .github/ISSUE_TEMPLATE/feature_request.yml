@@ -1,0 +1,28 @@
+name: Feature / idea
+description: New capability, tooling improvement, or research to try
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Domain
+      options: [main, navigation, localization, vision, firmware, infra / tooling, other]
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Idea, alternatives, and whether the interface contract changes
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: How we will know it works (a metric, a test, a demo)

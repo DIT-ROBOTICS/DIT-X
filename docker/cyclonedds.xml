@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CycloneDDS config shared by all containers (CYCLONEDDS_URI points here).
+  - Interfaces are auto-detected; pin one with
+      <NetworkInterface name="enp3s0"/>
+    only on a machine that needs it, via a robot-specific file, not here.
+  - Containers run with network_mode: host and ipc: host, so same-machine
+    traffic uses loopback. Shared-memory transport (iceoryx) is NOT enabled by
+    default: measure first (docs/middleware.md), turn on per robot if camera or
+    point-cloud topics need it.
+-->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain Id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface autodetermine="true" priority="default" multicast="default"/>
+      </Interfaces>
+    </General>
+    <Discovery>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <MaxAutoParticipantIndex>120</MaxAutoParticipantIndex>
+    </Discovery>
+  </Domain>
+</CycloneDDS>

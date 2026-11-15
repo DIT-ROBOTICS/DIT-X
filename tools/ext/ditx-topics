@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+# ditx-plugin: live topics on a robot: name, type, publishers
+# ditx-arg: -r,--robot choice:robots  target robot from config/robots.ini
+"""Example plugin: `ditx topics [-r ROBOT]`.
+
+Plugins are executables called ditx-<name> in tools/ext (or on PATH); `ditx <name>`
+runs them with DITX_ROOT set, so they can reuse the ditx modules like this one does.
+"""
+
+import argparse
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.environ['DITX_ROOT'], 'tools'))
+
+from ditx import cli, ui  # noqa: E402
+from ditx.workspace import Workspace  # noqa: E402
+
+
+def main():
+    ap = argparse.ArgumentParser(prog='ditx topics', description=__doc__.split('\n')[0])
+    ap.add_argument('-r', '--robot', help='robot from config/robots.ini (default: DIT_ROBOT)')
+    args = ap.parse_args()
+    # global flags given before the plugin name (`ditx -n topics`) arrive as env vars
+    args.dry_run = os.environ.get('DITX_DRY_RUN') == '1'
+    ui.VERBOSE = ui.VERBOSE or os.environ.get('DITX_VERBOSE') == '1'
+    ws = Workspace(os.environ['DITX_ROOT'])
+    try:
+        robot = cli.get_robot(ws, args.robot)
+        target = cli.Target(ws, robot, args)
+        svc = target.running_service()
+        target.sh(
+            target.compose(
+                f'exec -T -e EUROBOT_LOG_DIR= {svc} /opt/eurobot/entrypoint.sh '
+                'ros2 topic list -v --no-daemon'
+            ),
+            check=False,
+            log=False,
+            stream=True,
+        )
+    except cli.Fail as e:
+        ui.error(str(e))
+        return 1
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

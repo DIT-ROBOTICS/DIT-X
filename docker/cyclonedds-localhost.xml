@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DDS discovery on this machine only: what a `discovery = localhost` robot (the laptop
+  sim) runs with, and what tools joining it use (`ditx app`, `ditx shell`), on any distro.
+  It mirrors what Jazzy's ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST does with CycloneDDS:
+  no multicast, unicast discovery to localhost, participant indices up to 120.
+  Humble's ROS_LOCALHOST_ONLY=1 is NOT used: it relies on multicast on lo and does not
+  find peers configured like this (nor Jazzy's LOCALHOST range).
+-->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain Id="any">
+    <General>
+      <Interfaces><NetworkInterface autodetermine="true"/></Interfaces>
+      <AllowMulticast>false</AllowMulticast>
+    </General>
+    <Discovery>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <MaxAutoParticipantIndex>120</MaxAutoParticipantIndex>
+      <Peers><Peer address="localhost"/></Peers>
+    </Discovery>
+  </Domain>
+</CycloneDDS>

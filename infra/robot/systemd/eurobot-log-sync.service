@@ -1,0 +1,11 @@
+[Unit]
+Description=Copy /home/share/eurobot/logs to the lab NAS
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=@USER@
+ExecStart=/usr/local/lib/eurobot/eurobot-log-sync.sh
+Nice=10
+IOSchedulingClass=idle

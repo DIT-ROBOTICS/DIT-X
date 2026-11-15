@@ -1,0 +1,24 @@
+# domain repos are separate git repos, cloned by `ditx sync`
+/domains/*
+!/domains/.gitkeep
+
+# build output (per distro/arch/layer) and tool state
+/build/
+/install/
+/log/
+/logs/
+/.sim-robot/
+/compile_commands.json
+.cache/
+__pycache__/
+*.pyc
+
+# local settings
+/.env
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.ruff_cache/
+
+# docs preview / build output (ditx docs)
+/site/

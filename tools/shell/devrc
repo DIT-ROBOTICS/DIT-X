@@ -1,0 +1,27 @@
+# shellcheck shell=bash
+# rc file of `ditx shell`: bash --rcfile tools/shell/devrc -i (ROS + the workspace are already
+# sourced by ditx before this runs). Colors follow the ditx theme: accent cyan, user green.
+[[ -f /etc/bash.bashrc ]] && source /etc/bash.bashrc
+
+export CLICOLOR=1
+command -v dircolors >/dev/null && eval "$(dircolors -b)"
+alias ls='ls --color=auto'
+alias ll='ls -alF --color=auto'
+alias la='ls -A --color=auto'
+alias grep='grep --color=auto'
+HISTCONTROL=ignoreboth
+shopt -s histappend checkwinsize
+
+# Tab completion for ros2 and colcon (whatever this image ships)
+for f in "/opt/ros/${ROS_DISTRO:-}/share/ros2cli/environment/ros2-argcomplete.bash" \
+  /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash; do
+  # shellcheck disable=SC1090
+  [[ -f "$f" ]] && source "$f"
+done
+if ! complete -p ros2 >/dev/null 2>&1 && command -v register-python-argcomplete3 >/dev/null; then
+  eval "$(register-python-argcomplete3 ros2)"
+fi
+
+PS1='\[\e[38;5;45m\](ditx dev)\[\e[0m\] \[\e[38;5;78m\]\u@\h\[\e[0m\]:\[\e[38;5;75m\]\w\[\e[0m\]\$ '
+
+printf '\e[38;5;245m  ros2, colcon ready (ROS %s) · exit to leave\e[0m\n' "${ROS_DISTRO:-?}"

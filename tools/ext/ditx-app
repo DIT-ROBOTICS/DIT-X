@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+# ditx-plugin: GUI tools: foxglove, rviz, gazebo, groot, qgc
+# ditx-arg: tool choice:foxglove|rviz|gazebo|groot|qgc required  GUI tool to open
+# ditx-choice: foxglove  Foxglove bridge on ws://localhost:8765 (ROS2X desktop image)
+# ditx-choice: rviz  RViz2 window (ROS2X desktop image)
+# ditx-choice: gazebo  Gazebo with an empty world (ROS2X desktop image)
+# ditx-choice: groot  Groot2 behavior-tree editor (runs `ROS2X app groot`)
+# ditx-choice: qgc  QGroundControl (runs `ROS2X app qgroundcontrol`)
+# ditx-arg: -r,--robot choice:robots  target robot from config/robots.ini
+"""ditx app <tool> [-r ROBOT]: open a GUI tool attached to a robot's ROS graph.
+
+The tools come from ROS2X (https://github.com/SeanChangX/ROS2X), a general ROS 2
+toolbox that DIT-X composes: it runs that image with this robot's ROS_DOMAIN_ID and DDS
+discovery settings, plus this workspace's eurobot_interfaces, so every topic decodes.
+
+  foxglove  Foxglove bridge on ws://localhost:8765 (open it in Foxglove / Lichtblick)
+  rviz      RViz2 (X11 window)
+  gazebo    Gazebo (empty world, for trying things out)
+  groot     Groot2 behavior-tree editor  (runs `ROS2X app groot`; needs a ROS2X checkout)
+  qgc       QGroundControl               (runs `ROS2X app qgc`;   needs a ROS2X checkout)
+
+Environment: DITX_APP_IMAGE overrides the desktop image (default
+ghcr.io/seanchangx/ros2x:<distro>-desktop), DITX_ROS2X points at a ROS2X checkout
+(default: `ROS2X` on PATH, then ~/ROS2X/ROS2X).
+"""
+
+import argparse
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.join(os.environ['DITX_ROOT'], 'tools'))
+
+from ditx import cli, ui  # noqa: E402
+from ditx.workspace import Workspace, native_arch  # noqa: E402
+
+FOXGLOVE_PORT = 8765
+DESKTOP_TOOLS = {
+    'foxglove': 'exec ros2 run foxglove_bridge foxglove_bridge --ros-args -p port:=%d'
+    % FOXGLOVE_PORT,
+    'rviz': 'exec rviz2',
+    'gazebo': 'exec ros2 launch ros_gz_sim gz_sim.launch.py gz_args:=empty.sdf',
+}
+ROS2X_TOOLS = {'groot': 'groot', 'qgc': 'qgroundcontrol'}
+FALLBACK_DISTRO = 'humble'  # the distro ROS2X publishes desktop images for
+
+
+def image_exists(image):
+    found = subprocess.run(['docker', 'image', 'inspect', image], capture_output=True)
+    return found.returncode == 0
+
+
+def desktop_image(ws, dry_run):
+    """(image, distro). Prefer the workspace distro; fall back to ROS2X's humble image."""
+    if os.environ.get('DITX_APP_IMAGE'):
+        return os.environ['DITX_APP_IMAGE'], ws.distro
+    for distro in dict.fromkeys([ws.distro, FALLBACK_DISTRO]):
+        image = f'ghcr.io/seanchangx/ros2x:{distro}-desktop'
+        if image_exists(image):
+            return image, distro
+        if dry_run:
+            continue  # never pull in a dry run; ROS2X publishes humble desktop images
+        with ui.Task('image') as t:
+            t.status(f'pulling {image}')
+            if subprocess.run(['docker', 'pull', '-q', image], capture_output=True).returncode == 0:
+                t.status(f'pulled {image}')
+                return image, distro
+            t.skip(f'{image} not available')
+    if dry_run:
+        return f'ghcr.io/seanchangx/ros2x:{FALLBACK_DISTRO}-desktop', FALLBACK_DISTRO
+    raise cli.Fail('no ROS2X desktop image (docker pull ghcr.io/seanchangx/ros2x:humble-desktop)')
+
+
+def interfaces(ws, dry_run):
+    """(host dir, path inside the container) of this workspace's built base (eurobot_interfaces).
+
+    A local `ditx build --base` wins; otherwise the base of the dev image is copied out once
+    (refreshed when the image changes). Mounted where it was built, so its setup.bash works.
+    """
+    local = os.path.join(ws.build_dir(native_arch(), 'base'), 'install')
+    if os.path.isfile(os.path.join(local, 'setup.bash')):
+        return local, local
+    image = ws.dev_image()
+    cli.ensure_image(image, argparse.Namespace(dry_run=dry_run))
+    cache = os.path.join(ws.build_dir(native_arch(), 'app'), 'base')
+    inside = '/opt/eurobot/base/install'
+    if dry_run:
+        return cache, inside
+    image_id = subprocess.run(
+        ['docker', 'image', 'inspect', '-f', '{{.Id}}', image], capture_output=True, text=True
+    ).stdout.strip()
+    stamp = os.path.join(cache, 'IMAGE_ID')
+    try:
+        with open(stamp, encoding='utf-8') as f:
+            if f.read().strip() == image_id:
+                return os.path.join(cache, 'install'), inside
+    except OSError:
+        pass
+    with ui.Task('interfaces') as t:
+        t.status(f'copying eurobot_interfaces out of {image}')
+        shutil.rmtree(cache, ignore_errors=True)
+        os.makedirs(cache)
+        made = subprocess.run(['docker', 'create', image], capture_output=True, text=True)
+        box = made.stdout.strip()
+        try:
+            got = subprocess.run(['docker', 'cp', f'{box}:{inside}', cache], capture_output=True)
+        finally:
+            subprocess.run(['docker', 'rm', box], capture_output=True)
+        if made.returncode or got.returncode:
+            raise cli.Fail(f'could not copy {inside} out of {image}')
+        with open(stamp, 'w', encoding='utf-8') as f:
+            f.write(image_id + '\n')
+        t.done(f'from {image}')
+    return os.path.join(cache, 'install'), inside
+
+
+def x11_args():
+    args = ['-e', f'DISPLAY={os.environ.get("DISPLAY", ":0")}', '-e', 'QT_X11_NO_MITSHM=1']
+    args += ['-v', '/tmp/.X11-unix:/tmp/.X11-unix']
+    # the X cookie lets the container in without `xhost +` (which opens the screen to any
+    # local process); sessions that do not set XAUTHORITY keep it in ~/.Xauthority
+    xauth = os.environ.get('XAUTHORITY') or os.path.expanduser('~/.Xauthority')
+    if os.path.isfile(xauth):
+        args += ['-v', f'{xauth}:/tmp/.Xauthority:ro', '-e', 'XAUTHORITY=/tmp/.Xauthority']
+    if os.path.exists('/dev/dri'):
+        args += ['--device', '/dev/dri']
+    return args
+
+
+def discovery_args(ws, robot):
+    """A localhost robot (the laptop sim) uses unicast discovery on this machine; this file
+    reproduces that for any distro (Humble's ROS_LOCALHOST_ONLY would not find it)."""
+    if robot.discovery != 'localhost':
+        return []
+    xml = os.path.join(ws.root, 'docker', 'cyclonedds-localhost.xml')
+    return [
+        '-v',
+        f'{xml}:/tmp/cyclonedds.xml:ro',
+        '-e',
+        'CYCLONEDDS_URI=file:///tmp/cyclonedds.xml',
+    ]
+
+
+def find_ros2x():
+    for path in (
+        os.environ.get('DITX_ROS2X'),
+        shutil.which('ROS2X'),
+        os.path.expanduser('~/ROS2X/ROS2X'),
+    ):
+        if path and os.path.isfile(path) and os.access(path, os.X_OK):
+            return path
+    return None
+
+
+def run_ros2x(tool, robot, dry_run):
+    ros2x = find_ros2x()
+    if not ros2x:
+        raise cli.Fail(
+            f'{tool} runs through ROS2X: clone https://github.com/SeanChangX/ROS2X '
+            'to ~/ROS2X (or set DITX_ROS2X=/path/to/ROS2X)'
+        )
+    cmd = [ros2x, 'app', ROS2X_TOOLS[tool]]
+    ui.step(f'{tool} → robot {robot.name} (ROS_DOMAIN_ID {robot.domain_id}) · ROS2X')
+    ui.command(f'ROS_DOMAIN_ID={robot.domain_id} {shlex.join(cmd)}', force=dry_run)
+    if dry_run:
+        return 0
+    os.execvpe(cmd[0], cmd, {**os.environ, 'ROS_DOMAIN_ID': robot.domain_id})
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        prog='ditx app',
+        description=__doc__.split('\n')[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='\n'.join(__doc__.split('\n')[6:12]),
+    )
+    ap.add_argument('tool', nargs='?', choices=[*DESKTOP_TOOLS, *ROS2X_TOOLS])
+    ap.add_argument(
+        '-r', '--robot', help='target robot from config/robots.ini (default: DIT_ROBOT)'
+    )
+    args = ap.parse_args()
+    if not args.tool:
+        ap.print_help()
+        return 0
+    dry_run = os.environ.get('DITX_DRY_RUN') == '1'
+    ws = Workspace(os.environ['DITX_ROOT'])
+    try:
+        robot = cli.get_robot(ws, args.robot)
+        if args.tool in ROS2X_TOOLS:
+            return run_ros2x(args.tool, robot, dry_run)
+
+        # --init: PID 1 inside forwards SIGINT/SIGTERM, so Ctrl+C or a kill stops the tool
+        run = ['docker', 'run', '--rm', '--init', '-it' if sys.stdin.isatty() else '-i']
+        run += ['--name', f'ditx-app-{args.tool}', '--network', 'host', '--ipc', 'host']
+        run += ['-e', f'ROS_DOMAIN_ID={robot.domain_id}']
+        run += ['-e', 'RMW_IMPLEMENTATION=rmw_cyclonedds_cpp', *discovery_args(ws, robot)]
+        image, distro = desktop_image(ws, dry_run)
+        setup = f'source /opt/ros/{distro}/setup.bash'
+        if distro == ws.distro:
+            host_dir, inside = interfaces(ws, dry_run)
+            run += ['-v', f'{host_dir}:{inside}:ro']
+            setup += f' && source {inside}/setup.bash'
+        else:
+            ui.warn(
+                f'workspace is {ws.distro}, {image} is {distro}: standard messages show; '
+                'eurobot_interfaces types do not decode'
+            )
+        run += ['-e', f'LOCAL_USER_ID={os.getuid()}', '-e', f'LOCAL_GROUP_ID={os.getgid()}']
+        if args.tool != 'foxglove':
+            run += x11_args()
+        cmd = [*run, image, 'bash', '-c', f'{setup} && {DESKTOP_TOOLS[args.tool]}']
+        where = ', localhost' if robot.discovery == 'localhost' else ''
+        ui.step(f'{args.tool} → robot {robot.name} (ROS_DOMAIN_ID {robot.domain_id}{where})')
+        if args.tool == 'foxglove':
+            ui.info(
+                f'open Foxglove or Lichtblick → Open connection → ws://localhost:{FOXGLOVE_PORT}'
+                ' · Ctrl+C stops'
+            )
+        ui.command(shlex.join(cmd), force=dry_run)
+        if dry_run:
+            return 0
+        # exec, not a child: a signal sent to `ditx app` reaches docker (and the container)
+        os.execvp(cmd[0], cmd)
+    except cli.Fail as e:
+        ui.error(str(e))
+        return 1
+    except KeyboardInterrupt:
+        return 130
+
+
+if __name__ == '__main__':
+    sys.exit(main())

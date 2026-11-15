@@ -1,0 +1,146 @@
+# DIT-X user manual (zh-TW), built with MkDocs Material.
+#   preview: ditx docs          build: ditx docs build   (Docker, no local Python needed)
+# Published to GitHub Pages by .github/workflows/docs.yml.
+
+site_name: DIT-X Docs
+site_description: DIT Robotics Eurobot 工作區（ditx）教學與參考文件
+site_url: https://seanchangx.github.io/DIT-X/
+repo_url: https://github.com/SeanChangX/DIT-X
+repo_name: SeanChangX/DIT-X
+edit_uri: edit/develop/docs/
+copyright: >-
+  © 2026 DIT Robotics · MIT License ·
+  Made with <span class="dit-heart" aria-label="love">❤️</span> by
+  <a href="https://github.com/SeanChangX" title="Sean Chang">SCX</a>
+
+theme:
+  name: material
+  language: zh-TW
+  logo: assets/dit-mark.png
+  favicon: assets/favicon.svg
+  # Light / dark follow the OS by default; the toggle in the header overrides.
+  # Colours are defined in stylesheets/dit.css (primary/accent: custom).
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: 切換為淺色模式
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: 切換為深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: 跟隨系統設定
+  # Fonts are loaded by stylesheets/fonts.css (Inter + Noto Sans TC from Google
+  # Fonts, full JetBrains Mono self-hosted), so the theme loader stays off.
+  font: false
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+
+# maintainer notes next to the screenshots, not a page of the manual
+exclude_docs: |
+  assets/term/MAP.md
+
+extra:
+  generator: false   # footer credit above replaces "Made with Material for MkDocs"
+
+extra_css:
+  - stylesheets/fonts.css
+  - stylesheets/dit.css
+
+# Must stay a classic (non-module) script so it runs before Material mounts
+# the Mermaid component; see the header comment in the file.
+extra_javascript:
+  - javascripts/mermaid-theme.js
+
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+  # "Last updated" under every page, read from git history (needs the full history:
+  # fetch-depth 0 in CI). Ships with the squidfunk/mkdocs-material image.
+  - git-revision-date-localized:
+      type: date
+      locale: zh_TW
+      enable_creation_date: true
+      fallback_to_build_date: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - 首頁: index.md
+  - 教學:
+      - tutorials/index.md
+      - 新手入門:
+          - 01 安裝: tutorials/beginner/01-install.md
+          - 02 第一次建置與測試: tutorials/beginner/02-first-build.md
+          - 03 認識 TUI: tutorials/beginner/03-tui.md
+          - 04 第一個套件: tutorials/beginner/04-first-package.md
+          - 05 跨 domain 的 topic 與 QoS: tutorials/beginner/05-contract.md
+          - 06 模擬機器人: tutorials/beginner/06-sim-robot.md
+      - 中級:
+          - 07 部署 overlay 與復原: tutorials/intermediate/07-deploy.md
+          - 08 日誌與除錯: tutorials/intermediate/08-debugging.md
+          - 09 Git 流程與 CI: tutorials/intermediate/09-git-ci.md
+          - 10 管理機器人: tutorials/intermediate/10-robots.md
+      - 進階:
+          - 11 修改共用介面: tutorials/advanced/11-interfaces.md
+          - 12 新增 domain: tutorials/advanced/12-new-domain.md
+          - 13 撰寫 plugin: tutorials/advanced/13-plugins.md
+          - 14 arm64 與實體機器人: tutorials/advanced/14-real-robot.md
+          - 15 C++ 開發環境: tutorials/advanced/15-cpp.md
+  - 參考:
+      - 指令總覽: reference/commands.md
+      - 設定檔: reference/config.md
+      - 疑難排解 FAQ: reference/faq.md
+      - 新成員入門: onboarding.md
+  - 設計文件:
+      - Architecture: architecture.md
+      - Workflow: workflow.md
+      - Logging: logging.md
+      - Middleware: middleware.md
+      - Interface contract: contract.md
+      - ADR 0001: adr/0001-shell-and-domains.md
+      - ADR template: adr/template.md

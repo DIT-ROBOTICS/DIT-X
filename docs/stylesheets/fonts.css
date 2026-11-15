@@ -1,0 +1,59 @@
+/*
+ * Fonts.
+ *
+ * Text: Inter (Latin) + a Traditional Chinese face for CJK. Display: Chakra
+ * Petch (angular, hardware-style) for the wordmark (header title, home page hero), same CJK fallback. Both come from
+ * Google Fonts, which serves Noto Sans TC in unicode-range slices, so only the
+ * glyphs a page uses are downloaded.
+ *
+ * Code: JetBrains Mono is self-hosted (assets/fonts, OFL-1.1). The Google Fonts
+ * build of JetBrains Mono is subset to Latin/Cyrillic/Greek and drops box
+ * drawing (U+2500), arrows (U+2190) and check marks (U+2713). Those then fall
+ * back to another font with a different advance width and the terminal output
+ * in the tutorials stops lining up. The upstream webfont has all of them.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&family=Chakra+Petch:wght@600;700&display=swap");
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/JetBrainsMono-Italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/JetBrainsMono-Bold.woff2") format("woff2");
+}
+
+/*
+ * Material builds its stacks as `var(--md-text-font, _), <system fallbacks>`.
+ * Naming a Traditional Chinese face explicitly is the actual fix for the
+ * punctuation: without it the browser asks fontconfig for "any font with
+ * U+3002", and on an en_US Linux desktop that is Noto Sans CJK JP, whose 。，
+ * sit in the bottom-left corner of the em box (Japanese/Simplified style)
+ * instead of the centre (Taiwan standard).
+ *
+ * Order: Latin face first, then the best native TC face per platform
+ * (macOS/iOS, Linux), then the web font, then Windows.
+ */
+:root:root {
+  --md-text-font: "Inter", "PingFang TC", "Noto Sans CJK TC", "Noto Sans TC",
+    "Microsoft JhengHei";
+  --dit-display-font: "Chakra Petch", "PingFang TC", "Noto Sans CJK TC",
+    "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --md-code-font: "JetBrains Mono", "Noto Sans Mono CJK TC", "PingFang TC",
+    "Noto Sans TC", "Microsoft JhengHei";
+}

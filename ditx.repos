@@ -1,0 +1,24 @@
+# Domain repos of this workspace (vcstool format: `vcs import < ditx.repos` also works).
+# `ditx sync` clones / fast-forwards them into domains/<name>.
+#
+# version: a branch while developing; pin tags (or commits) on a release branch,
+# so a tag of THIS repo + this file = exactly reproducible robot software.
+# One-off override without editing: ditx sync --ref localization=feat/ekf
+# (CI: DIT_REF_LOCALIZATION=feat/ekf)
+repositories:
+  domains/main:
+    type: git
+    url: https://github.com/SeanChangX/Eurobot-Main.git
+    version: develop
+  domains/navigation:
+    type: git
+    url: https://github.com/SeanChangX/Eurobot-Navigation.git
+    version: develop
+  domains/localization:
+    type: git
+    url: https://github.com/SeanChangX/Eurobot-Localization.git
+    version: develop
+  domains/vision:
+    type: git
+    url: https://github.com/SeanChangX/Eurobot-Vision.git
+    version: develop

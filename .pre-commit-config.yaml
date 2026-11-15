@@ -1,0 +1,47 @@
+# Local guards = the CI lint stage, run before every commit.
+#   pip install pre-commit   (or pipx install pre-commit)
+#   pre-commit install && pre-commit install --hook-type commit-msg
+# Versions are pinned to match the dev image (docker/Dockerfile), so a file
+# formatted on your laptop is formatted identically in CI.
+default_install_hook_types: [pre-commit, commit-msg]
+exclude: ^(domains/|build/|\.sim-robot/)
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+        exclude: ^(docker/compose\.yaml|mkdocs\.yml)$   # compose merge keys (<<:); mkdocs !!python tags
+      - id: check-added-large-files
+        args: [--maxkb=1024]              # weights, bags, datasets: release assets or git-lfs
+      - id: check-merge-conflict
+
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v18.1.8
+    hooks:
+      - id: clang-format
+        types_or: [c, c++]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: [-x]
+
+  - repo: local
+    hooks:
+      - id: conventional-commit
+        name: Conventional Commits message
+        entry: tools/hooks/commit-msg
+        language: script
+        stages: [commit-msg]

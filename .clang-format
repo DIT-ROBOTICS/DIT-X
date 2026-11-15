@@ -1,0 +1,27 @@
+# C++ style for every package in the workspace (domains inherit it because they
+# are checked out under domains/). Checked by `ditx lint`, fixed by `ditx lint --fix`.
+---
+Language: Cpp
+BasedOnStyle: Google
+# 80 is too tight for ROS type names (rclcpp::Subscription<geometry_msgs::msg::...>)
+ColumnLimit: 100
+# ROS 2 code (ament_uncrustify style) indents access modifiers flush left
+AccessModifierOffset: -2
+# one argument per line once a call wraps: diffs stay small
+BinPackArguments: false
+BinPackParameters: false
+# `Type * ptr` / `Type & ref`, matching rclcpp and the ROS 2 style guide
+DerivePointerAlignment: false
+PointerAlignment: Middle
+# group project headers after system/ROS headers, keep each block sorted
+IncludeBlocks: Preserve
+SortIncludes: CaseSensitive
+# short lambdas/functions may stay on one line, longer ones never
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortLambdasOnASingleLine: Inline
+# no single-line if/loops: always braces on their own lines
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+# keep comment text as written (Chinese comments included)
+ReflowComments: false
+...

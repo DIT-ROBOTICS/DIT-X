@@ -1,0 +1,10 @@
+[Unit]
+Description=Prune /home/share/eurobot/logs (age and size limits)
+Documentation=file:///home/share/eurobot/config/logging.env
+
+[Service]
+User=@USER@
+Type=oneshot
+ExecStart=/usr/local/lib/eurobot/eurobot-log-retention.sh
+Nice=10
+IOSchedulingClass=idle

@@ -1,0 +1,1 @@
+Templates for `ditx new`, not packages: keep colcon from building them.

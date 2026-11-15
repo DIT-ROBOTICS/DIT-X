@@ -1,0 +1,18 @@
+{
+  // clangd for C++ (needs compile_commands.json: run `ditx index` after `ditx build`)
+  "clangd.arguments": [
+    "--compile-commands-dir=${workspaceFolder}",
+    "--header-insertion=never",
+    "--background-index"
+  ],
+  // Microsoft's IntelliSense would fight clangd; keep only the debugger part
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "[cpp]": { "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd" },
+  "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.exclude": { "**/__pycache__": true },
+  "search.exclude": { "build/**": true, ".sim-robot/**": true, "compile_commands.json": true },
+  "files.watcherExclude": { "**/build/**": true, "**/.sim-robot/**": true }
+}

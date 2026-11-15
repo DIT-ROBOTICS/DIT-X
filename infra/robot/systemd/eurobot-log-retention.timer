@@ -1,0 +1,9 @@
+[Unit]
+Description=Prune /home/share/eurobot/logs hourly
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Export journal and kernel messages into /home/share/eurobot/logs/system
+
+[Service]
+User=@USER@
+# reading the journal (and kernel messages) needs this group, not root
+SupplementaryGroups=systemd-journal
+Type=oneshot
+ExecStart=/usr/local/lib/eurobot/eurobot-syslog-export.sh

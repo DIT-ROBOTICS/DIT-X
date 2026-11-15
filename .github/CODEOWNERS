@@ -1,0 +1,7 @@
+# Reviewers are requested automatically from here. A personal repo can only list
+# people; once the repos live in an organization, split this per team, e.g.
+#   /base/   @<org>/eurobot-leads
+#   /tools/  @<org>/eurobot-infra
+# and enable "Require review from Code Owners" on develop/main to enforce it.
+
+*                       @SeanChangX

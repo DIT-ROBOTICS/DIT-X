@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="876" height="719.2" viewBox="0 0 876 719.2" xml:space="preserve" role="img" aria-label="$ ditx help build">
+<style>.t3b3967 text{font-family:'JetBrains Mono', 'Cascadia Code', 'DejaVu Sans Mono', monospace;font-size:14px;white-space:pre;font-variant-ligatures:none}.t3b3967-0{fill:#00d7ff;font-weight:700}.t3b3967-1{fill:#dcdeef}</style>
+<defs><linearGradient id="t3b3967-ramp" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#d70000"/><stop offset="0.17" stop-color="#ff005f"/><stop offset="0.33" stop-color="#ff00af"/><stop offset="0.5" stop-color="#af5fff"/><stop offset="0.67" stop-color="#5f5fff"/><stop offset="0.83" stop-color="#00afff"/><stop offset="1" stop-color="#00d7ff"/></linearGradient><clipPath id="t3b3967-clip"><rect width="876" height="719.2" rx="10"/></clipPath></defs>
+<g class="t3b3967" clip-path="url(#t3b3967-clip)">
+<rect width="876" height="719.2" fill="#0e0f1d"/>
+<rect width="876" height="36" fill="#171829"/>
+<rect y="34" width="876" height="2" fill="url(#t3b3967-ramp)" opacity="0.85"/>
+<circle cx="20" cy="18.0" r="6" fill="#ff5f57"/><circle cx="40" cy="18.0" r="6" fill="#febc2e"/><circle cx="60" cy="18.0" r="6" fill="#28c840"/>
+<text x="438" y="22.5" text-anchor="middle" fill="#8a8db0" font-size="13">~/DIT-X</text>
+<text x="18" y="63.3" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="t3b3967-0">$</text>
+<text x="26.4" y="63.3" textLength="134.4" lengthAdjust="spacingAndGlyphs" class="t3b3967-1"> ditx help build</text>
+<text x="18" y="81.5" textLength="210" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">usage: ditx build [flags]</text>
+<text x="18" y="117.9" textLength="403.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">build domains in the dev container (incremental)</text>
+<text x="18" y="154.3" textLength="67.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">options:</text>
+<text x="18" y="172.5" textLength="462" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  -h, --help            show this help message and exit</text>
+<text x="18" y="190.7" textLength="504" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  -n, --dry-run         print what would run, change nothing</text>
+<text x="18" y="208.9" textLength="487.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  -v, --verbose         show the full output of every tool</text>
+<text x="18" y="227.1" textLength="453.6" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  -q, --quiet           print only warnings and errors</text>
+<text x="18" y="245.3" textLength="285.6" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  -d DOMAIN..., --domain DOMAIN...</text>
+<text x="18" y="263.5" textLength="445.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">                        domains (default: all synced)</text>
+<text x="18" y="281.7" textLength="252" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  -p PKG..., --packages PKG...</text>
+<text x="18" y="299.9" textLength="487.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">                        only these packages (+ their deps)</text>
+<text x="18" y="318.1" textLength="613.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --base                also rebuild the shared base (interfaces) locally</text>
+<text x="18" y="336.3" textLength="596.4" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --arch ARCH           CPU architecture to build for (default: native)</text>
+<text x="18" y="354.5" textLength="747.6" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  -j N, --jobs N        compile jobs per package (make -j): auto (by RAM/CPU) or a number</text>
+<text x="18" y="372.7" textLength="789.6" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --workers N           packages built at the same time (colcon --parallel-workers): auto or a</text>
+<text x="18" y="390.9" textLength="252" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">                        number</text>
+<text x="18" y="409.1" textLength="378" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --build-type {RelWithDebInfo,Release,Debug}</text>
+<text x="18" y="427.3" textLength="336" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">                        CMake build type</text>
+<text x="18" y="445.5" textLength="613.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --clean               wipe the build dirs of the selected domains first</text>
+<text x="18" y="463.7" textLength="789.6" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --clangd              refresh compile_commands.json for clangd after the build (same as ditx</text>
+<text x="18" y="481.9" textLength="252" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">                        index)</text>
+<text x="18" y="518.3" textLength="67.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">Choices:</text>
+<text x="18" y="536.5" textLength="672" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --arch amd64                 x86-64 PCs and mini PCs (most laptops, Intel NUC)</text>
+<text x="18" y="554.7" textLength="814.8" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --arch arm64                 ARM boards (Raspberry Pi, Jetson); cross compiled on a PC, no qemu</text>
+<text x="18" y="572.9" textLength="663.6" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --build-type RelWithDebInfo  optimized + debug symbols (default, recommended)</text>
+<text x="18" y="591.1" textLength="630" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --build-type Release         fastest, no debug info: what runs at matches</text>
+<text x="18" y="609.3" textLength="688.8" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  --build-type Debug           no optimization: best for stepping through with gdb</text>
+<text x="18" y="645.7" textLength="75.6" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">Examples:</text>
+<text x="18" y="663.9" textLength="100.8" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  ditx build</text>
+<text x="18" y="682.1" textLength="428.4" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  ditx build -d localization -p localization_fusion</text>
+<text x="18" y="700.3" textLength="235.2" lengthAdjust="spacingAndGlyphs" class="t3b3967-1">  ditx build --base --clangd</text>
+</g>
+<rect x="0.5" y="0.5" width="875" height="718.2" rx="9.5" fill="none" stroke="#2b2d48"/>
+</svg>

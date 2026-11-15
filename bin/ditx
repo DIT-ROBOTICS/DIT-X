@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+"""ditx launcher: finds the workspace this file belongs to and runs tools/ditx."""
+import os
+import sys
+
+here = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(here), 'tools'))
+os.environ.setdefault('DIT_ROOT', os.path.dirname(here))
+
+from ditx.cli import main  # noqa: E402
+
+sys.exit(main())

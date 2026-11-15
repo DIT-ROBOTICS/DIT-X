@@ -1,0 +1,43 @@
+name: Bug report
+description: Something on the robot or in the tooling misbehaves
+labels: [bug]
+body:
+  - type: input
+    id: robot
+    attributes:
+      label: Robot
+      description: Which robot (config/robots.ini name), or "laptop" / "CI"
+      placeholder: white
+    validations:
+      required: true
+  - type: input
+    id: when
+    attributes:
+      label: When
+      description: Date and time it happened (logs are searched by time)
+      placeholder: 2027-03-14 15:42
+    validations:
+      required: true
+  - type: input
+    id: overlay
+    attributes:
+      label: Overlay / image
+      description: Output of `ditx overlays -r <robot>` for the domain, or "stable image"
+      placeholder: 20270314-153012-alice-1a2b3c4 (localization)
+  - type: input
+    id: logs
+    attributes:
+      label: Log file
+      description: Path under /home/share/eurobot/logs/ on the robot (or `ditx logs --fetch` copy)
+      placeholder: /home/share/eurobot/logs/localization/localization_20270314T153020.log
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened vs. what you expected
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: Commands, field position, match phase, ...

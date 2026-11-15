@@ -1,0 +1,37 @@
+# Shared job setup: buildx, domain repos, and the dev image of this commit.
+name: ditx setup
+description: Sync domains and build the dev image (cached) that every CI stage runs in
+inputs:
+  sync-token:
+    description: >-
+      Token with read access to private domain repos (repo secret DIT_SYNC_TOKEN).
+      Not needed while the domain repos are public.
+    required: false
+    default: ''
+  build-dev-image:
+    description: Build the dev image from this commit (false = pull DIT_DEV_IMAGE)
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - uses: docker/setup-buildx-action@v3
+    # buildx's type=gha cache needs the Actions runtime token, which only JS actions get
+    - uses: crazy-max/ghaction-github-runtime@v3
+    - name: Sync domains
+      shell: bash
+      env:
+        DIT_SYNC_TOKEN: ${{ inputs.sync-token }}
+      run: |
+        if [[ -n "$DIT_SYNC_TOKEN" ]]; then
+          git config --global url."https://x-access-token:${DIT_SYNC_TOKEN}@github.com/".insteadOf https://github.com/
+        fi
+        bin/ditx sync
+    - name: Dev image
+      shell: bash
+      run: |
+        if [[ "${{ inputs.build-dev-image }}" == true ]]; then
+          bin/ditx image --target dev --tag ci
+        else
+          docker pull "$DIT_DEV_IMAGE"
+        fi

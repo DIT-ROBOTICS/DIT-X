@@ -1,0 +1,18 @@
+# Stable device names for robot hardware, so compose files and launch params use
+# /dev/dit-* instead of /dev/ttyACM0 / ttyUSB1, which change with plug order.
+#
+# Find the attributes of a plugged-in device:
+#   udevadm info -a -n /dev/ttyACM0 | grep -E 'idVendor|idProduct|serial' | head
+# Replace the XXXX placeholders, copy to /etc/udev/rules.d/ (install.sh does it), then:
+#   sudo udevadm control --reload && sudo udevadm trigger
+# GROUP=dialout: containers join dialout (group_add in docker/compose.yaml), so they
+# open these without root, whichever account deployed them.
+
+# STM32 board running micro-ROS (uros-agent service in docker/compose.yaml)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="XXXX", ATTRS{serial}=="XXXXXXXXXXXX", SYMLINK+="dit-stm32", GROUP="dialout", MODE="0660"
+
+# 2D LiDAR (USB-serial adapter, e.g. CP210x 10c4:ea60)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="XXXX", SYMLINK+="dit-lidar", GROUP="dialout", MODE="0660"
+
+# IMU
+SUBSYSTEM=="tty", ATTRS{idVendor}=="XXXX", ATTRS{idProduct}=="XXXX", ATTRS{serial}=="XXXX", SYMLINK+="dit-imu", GROUP="dialout", MODE="0660"

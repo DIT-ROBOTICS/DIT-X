@@ -1,0 +1,113 @@
+# GitLab mirror of .github/workflows/ci.yml: same stages, same `bin/ditx` calls.
+#
+# Runner: a shell executor on a lab machine/VM with docker, docker buildx,
+# python3 and git (tag: ditx). Why not docker-in-docker: ditx bind-mounts the
+# workspace into the dev container at the *same path*; with dind the bind mount
+# would resolve inside the dind daemon, where the checkout does not exist.
+# (A docker executor also works if it mounts /var/run/docker.sock and uses a
+# builds_dir that is the same path on the host and in the job container.)
+# One-time on the runner host, for arm64 images:
+#   docker run --privileged --rm tonistiigi/binfmt --install arm64
+#   docker buildx create --name ditx --driver docker-container --use
+#
+# Registry: images go to $CI_REGISTRY_IMAGE/eurobot-*  (GitLab container registry).
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+stages: [check, test, image]
+
+variables:
+  REGISTRY: $CI_REGISTRY_IMAGE
+  ROS_DISTRO: humble
+  # unique per pipeline AND distro: the humble/jazzy jobs share the runner's docker daemon
+  DIT_DEV_IMAGE: $CI_REGISTRY_IMAGE/eurobot-dev:ci-$CI_PIPELINE_ID-$ROS_DISTRO
+  DIT_CROSS_IMAGE: $CI_REGISTRY_IMAGE/eurobot-cross:ci-$CI_PIPELINE_ID-$ROS_DISTRO
+  DIT_BAKE_CACHE: type=registry,ref=$CI_REGISTRY_IMAGE/cache:$ROS_DISTRO
+  FORCE_COLOR: "1"
+  GIT_DEPTH: "0"
+
+default:
+  tags: [ditx]
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker buildx inspect ditx >/dev/null 2>&1 || docker buildx create --name ditx --driver docker-container
+    - docker buildx use ditx
+    # private domain repos: masked CI variable DIT_SYNC_TOKEN (read access). The domains are
+    # listed with github.com URLs in ditx.repos; a GitLab mirror needs DIT_REPOS_FILE instead.
+    - |
+      if [ -n "${DIT_SYNC_TOKEN:-}" ]; then
+        git config --global url."https://x-access-token:${DIT_SYNC_TOKEN}@github.com/".insteadOf https://github.com/
+        git config --global url."https://oauth2:${DIT_SYNC_TOKEN}@${CI_SERVER_HOST}/".insteadOf "https://${CI_SERVER_HOST}/"
+      fi
+    - bin/ditx sync
+
+.dev-image: &dev-image
+  - bin/ditx image --target dev --tag "ci-$CI_PIPELINE_ID-$ROS_DISTRO"
+
+mr-title:
+  stage: check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  before_script: []
+  script:
+    - |
+      re='^(feat|fix|docs|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9_/-]+\))?!?: .{3,}$'
+      if ! printf '%s' "$CI_MERGE_REQUEST_TITLE" | grep -Eq "$re"; then
+        echo "MR title must look like 'feat(localization): fuse camera pose' (got: $CI_MERGE_REQUEST_TITLE)"
+        exit 1
+      fi
+
+lint:
+  stage: check
+  script:
+    - *dev-image
+    - bin/ditx ci lint
+
+build-test:
+  stage: test
+  parallel:
+    matrix:
+      - ROS_DISTRO: [humble, jazzy]
+  # Humble is what the robots run and must pass; Jazzy is the next distro: keep it
+  # building, do not block merges on it.
+  rules:
+    - if: $ROS_DISTRO == "jazzy"
+      allow_failure: true
+    - when: on_success
+  script:
+    - *dev-image
+    - bin/ditx ci build
+    - bin/ditx ci test
+    - bin/ditx image --target cross --tag "ci-$CI_PIPELINE_ID-$ROS_DISTRO"
+    - bin/ditx ci cross
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - build/*/integration/*.log
+    reports:
+      junit: build/*/*/build/*/test_results/**/*.xml
+
+images:
+  stage: image
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  variables:
+    DIT_PLATFORMS: linux/amd64,linux/arm64
+  script:
+    # develop → :develop, main → :stable, vX.Y.Z → :vX.Y.Z (+ sha-xxxxxxx)
+    - bin/ditx ci image
+
+cleanup:
+  stage: .post
+  when: always
+  before_script: []
+  script:
+    # the per-distro dev images of this pipeline (on this runner; other runners prune their own)
+    - for d in humble jazzy; do docker image rm "$CI_REGISTRY_IMAGE"/eurobot-{dev,cross}:"ci-$CI_PIPELINE_ID-$d" 2>/dev/null || true; done

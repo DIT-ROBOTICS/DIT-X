@@ -1,0 +1,13 @@
+# type(scope): subject   ← ≤ 100 chars, imperative ("add", not "added")
+#
+# types: feat fix docs refactor perf test build ci chore revert
+# scope: a domain or area: main, navigation, localization, vision, base, tools, docker, ci
+# add "!" after the type/scope for breaking changes: feat(base)!: rename pose topic
+#
+# Body: WHY the change was needed and what it affects (wrap at 72).
+# Tested: how (sim / robot white, overlay id, ditx test).
+#
+# Refs: #123
+# BREAKING CHANGE: <what users of the old behaviour must do>
+#
+# Enable once:  git config commit.template .gitmessage

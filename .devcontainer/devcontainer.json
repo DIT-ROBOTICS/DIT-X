@@ -1,0 +1,33 @@
+// VS Code / Dev Containers: open this folder "in container" to get clangd with
+// working ROS headers, the same compilers and linters as CI.
+// The workspace is mounted at the SAME absolute path as on the host, so paths in
+// compile_commands.json (from `ditx index`) resolve both inside and outside.
+{
+  "name": "eurobot dev",
+  "image": "ghcr.io/seanchangx/eurobot-dev:local",   // ditx image --target dev
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
+  "workspaceFolder": "${localWorkspaceFolder}",
+  "runArgs": ["--network=host", "--ipc=host"],
+  "containerUser": "dit",
+  "updateRemoteUserUID": true,
+  // ROS settings of the `sim` robot (config/robots.ini: domain_id 42, discovery localhost),
+  // so `ros2 topic list` in this container sees the sim from `ditx up` and nothing else
+  "containerEnv": {
+    "DIT_ROOT": "${localWorkspaceFolder}",
+    "ROS_DOMAIN_ID": "42",
+    "CYCLONEDDS_URI": "file:///opt/eurobot/cyclonedds-localhost.xml",
+    "ROS_AUTOMATIC_DISCOVERY_RANGE": "LOCALHOST"
+  },
+  "mounts": ["source=eurobot-ccache,target=/ccache,type=volume"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "redhat.vscode-yaml",
+        "ms-iot.vscode-ros"
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# One PR a month that bumps the GitHub Actions used by CI, so a deprecated action
+# version never turns CI red out of the blue. Robot code is not touched.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ['*']

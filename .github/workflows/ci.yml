@@ -1,0 +1,88 @@
+# Shell repo pipeline. Every job only calls `bin/ditx ...`, so running the same
+# command on your laptop reproduces CI exactly:
+#   ditx ci lint | ditx ci build | ditx ci test | ditx ci cross
+# CI only verifies: no images are published while the repos live in a personal
+# account (GHCR space is small). Laptops and robots build their own with `ditx image`.
+# To publish again (an org or GitLab with a registry), add a job on push that runs
+# `bin/ditx ci image` with packages: write, docker/setup-qemu-action and
+# DIT_PLATFORMS=linux/amd64,linux/arm64.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ghcr.io/seanchangx
+  # CI jobs build the dev image from THIS commit and run every stage inside it
+  DIT_DEV_IMAGE: ghcr.io/seanchangx/eurobot-dev:ci
+  DIT_CROSS_IMAGE: ghcr.io/seanchangx/eurobot-cross:ci
+  DIT_BAKE_CACHE: type=gha
+  FORCE_COLOR: '1'
+
+jobs:
+  pr-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conventional Commits title (squash merge uses it as the commit message)
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          re='^(feat|fix|docs|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9_/-]+\))?!?: .{3,}$'
+          if [[ ! "$TITLE" =~ $re ]]; then
+            echo "::error::PR title must look like 'feat(localization): fuse camera pose' (got: $TITLE)"
+            exit 1
+          fi
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          sync-token: ${{ secrets.DIT_SYNC_TOKEN }}
+      - run: bin/ditx ci lint
+
+  build-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ros_distro: [humble, jazzy]
+    # Humble is what the robots run and must pass; Jazzy is the next distro:
+    # keep it building so the migration is ready, but do not block merges on it.
+    continue-on-error: ${{ matrix.ros_distro == 'jazzy' }}
+    env:
+      ROS_DISTRO: ${{ matrix.ros_distro }}
+      DIT_BAKE_CACHE: type=gha,scope=${{ matrix.ros_distro }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          sync-token: ${{ secrets.DIT_SYNC_TOKEN }}
+      - run: bin/ditx ci build
+      - run: bin/ditx ci test
+      - name: arm64 (cross compiled, what arm64 robots get from ditx deploy)
+        run: |
+          bin/ditx image --target cross --tag ci
+          bin/ditx ci cross
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.ros_distro }}
+          path: |
+            build/**/test_results/**/*.xml
+            build/**/integration/*.log
+          if-no-files-found: ignore

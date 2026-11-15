@@ -1,0 +1,14 @@
+# Startup handshake: every module reports in before the match can start.
+# Replaces the 2026 StartUpSrv, whose magic "group" ints (1 main ... 6 ninja)
+# had to be kept in sync by hand in six repos.
+
+uint8 STATE_BOOTING = 0
+uint8 STATE_READY = 1
+uint8 STATE_ERROR = 2
+
+string domain   # must be listed under `domains:` in eurobot_common/contract.yaml
+string module   # free text, e.g. "fusion" or "aruco"
+uint8 state
+---
+bool accepted
+string message

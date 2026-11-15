@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1044" height="591.8" viewBox="0 0 1044 591.8" xml:space="preserve" role="img" aria-label="$ ditx deploy -d localization -r sim">
+<style>.tb29425 text{font-family:'JetBrains Mono', 'Cascadia Code', 'DejaVu Sans Mono', monospace;font-size:14px;white-space:pre;font-variant-ligatures:none}.tb29425-0{fill:#00d7ff;font-weight:700}.tb29425-1{fill:#dcdeef}.tb29425-2{fill:#5fd787;font-weight:700}.tb29425-3{fill:#8a8a8a}.tb29425-4{fill:#ffd700;font-weight:700}.tb29425-5{fill:#ff5f5f;font-weight:700}</style>
+<defs><linearGradient id="tb29425-ramp" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#d70000"/><stop offset="0.17" stop-color="#ff005f"/><stop offset="0.33" stop-color="#ff00af"/><stop offset="0.5" stop-color="#af5fff"/><stop offset="0.67" stop-color="#5f5fff"/><stop offset="0.83" stop-color="#00afff"/><stop offset="1" stop-color="#00d7ff"/></linearGradient><clipPath id="tb29425-clip"><rect width="1044" height="591.8" rx="10"/></clipPath></defs>
+<g class="tb29425" clip-path="url(#tb29425-clip)">
+<rect width="1044" height="591.8" fill="#0e0f1d"/>
+<rect width="1044" height="36" fill="#171829"/>
+<rect y="34" width="1044" height="2" fill="url(#tb29425-ramp)" opacity="0.85"/>
+<circle cx="20" cy="18.0" r="6" fill="#ff5f57"/><circle cx="40" cy="18.0" r="6" fill="#febc2e"/><circle cx="60" cy="18.0" r="6" fill="#28c840"/>
+<text x="522" y="22.5" text-anchor="middle" fill="#8a8db0" font-size="13">~/DIT-X</text>
+<g fill="none" stroke-linecap="square"><path d="M34.8 113.7H51.6" stroke="#8a8a8a" stroke-width="1.25"/><path d="M39 204.7V195.6M39 204.7V213.8" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 222.9V213.8M39 222.9V232" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 241.1V232M39 241.1V250.2" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 277.5V268.4M39 277.5V286.6" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 295.7V286.6M39 295.7V304.8" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 313.9V304.8M39 313.9V323" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 332.1V323M39 332.1V341.2" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 350.3V341.2M39 350.3V359.4" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 423.1V414M39 423.1V432.2" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 441.3V432.2M39 441.3V450.4" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 459.5V450.4M39 459.5V468.6" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 495.9V486.8M39 495.9V505" stroke="#3a3a3a" stroke-width="1.25"/><path d="M39 514.1V505M39 514.1V523.2" stroke="#3a3a3a" stroke-width="1.25"/></g>
+<text x="18" y="63.3" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="tb29425-0">$</text>
+<text x="26.4" y="63.3" textLength="294" lengthAdjust="spacingAndGlyphs" class="tb29425-1"> ditx deploy -d localization -r sim</text>
+<text x="18" y="81.5" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="tb29425-0">▸</text>
+<text x="26.4" y="81.5" textLength="680.4" lengthAdjust="spacingAndGlyphs" class="tb29425-1"> build  humble/amd64 · 3 workers × make -j5 · RAM cap 24 GB → build/humble-amd64/</text>
+<text x="18" y="99.7" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="tb29425-2">✓</text>
+<text x="26.4" y="99.7" textLength="218.4" lengthAdjust="spacingAndGlyphs" class="tb29425-1"> localization   2 packages</text>
+<text x="18" y="117.9" textLength="142.8" lengthAdjust="spacingAndGlyphs" class="tb29425-3">     1 built · 1s</text>
+<text x="18" y="136.1" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="tb29425-0">▸</text>
+<text x="26.4" y="136.1" textLength="529.2" lengthAdjust="spacingAndGlyphs" class="tb29425-1"> deploy → sim (this machine) · gone after reboot (stable image)</text>
+<text x="18" y="154.3" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="tb29425-4">!</text>
+<text x="26.4" y="154.3" textLength="764.4" lengthAdjust="spacingAndGlyphs" class="tb29425-1"> localization has uncommitted changes: the overlay id ends in -dirty so everyone can see it</text>
+<text x="18" y="172.5" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="tb29425-5">✗</text>
+<text x="26.4" y="172.5" textLength="579.6" lengthAdjust="spacingAndGlyphs" class="tb29425-1"> localization   20261116-000846-student-22c7200-dirty did not come up</text>
+<text x="606" y="172.5" textLength="33.6" lengthAdjust="spacingAndGlyphs" class="tb29425-3">  3s</text>
+<text x="18" y="190.7" textLength="134.4" lengthAdjust="spacingAndGlyphs" class="tb29425-3">  container log:</text>
+<text x="51.6" y="208.9" textLength="705.6" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[entrypoint] log file /var/log/eurobot/localization/localization_20261116T000848.log</text>
+<text x="51.6" y="227.1" textLength="898.8" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[entrypoint] overlay 20261116-000846-student-22c7200-dirty active · by student · localization@22c7200-dirty</text>
+<text x="51.6" y="245.3" textLength="974.4" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[INFO] [launch]: All log files can be found below /var/log/eurobot/localization/ros/2026-11-16-00-08-48-660498-lapto</text>
+<text x="18" y="263.5" textLength="25.2" lengthAdjust="spacingAndGlyphs" class="tb29425-1">p-7</text>
+<text x="51.6" y="281.7" textLength="478.8" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[INFO] [launch]: Default logging verbosity is set to INFO</text>
+<text x="51.6" y="299.9" textLength="445.2" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[INFO] [fusion_node-1]: process started with pid [52]</text>
+<text x="51.6" y="318.1" textLength="697.2" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[fusion_node-1] terminate called after throwing an instance of 'std::runtime_error'</text>
+<text x="51.6" y="336.3" textLength="260.4" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[fusion_node-1]   what():  boom</text>
+<text x="51.6" y="354.5" textLength="974.4" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[ERROR] [fusion_node-1]: process has died [pid 52, exit code -6, cmd '/var/lib/eurobot/overlays/localization/2026111</text>
+<text x="18" y="372.7" textLength="1008" lengthAdjust="spacingAndGlyphs" class="tb29425-1">6-000846-student-22c7200-dirty/install/lib/localization_fusion/fusion_node --ros-args -r __node:=fusion --params-file /v</text>
+<text x="18" y="390.9" textLength="1008" lengthAdjust="spacingAndGlyphs" class="tb29425-1">ar/lib/eurobot/overlays/localization/20261116-000846-student-22c7200-dirty/install/share/localization_bringup/config/def</text>
+<text x="18" y="409.1" textLength="100.8" lengthAdjust="spacingAndGlyphs" class="tb29425-1">ault.yaml'].</text>
+<text x="51.6" y="427.3" textLength="705.6" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[entrypoint] log file /var/log/eurobot/localization/localization_20261116T000849.log</text>
+<text x="51.6" y="445.5" textLength="898.8" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[entrypoint] overlay 20261116-000846-student-22c7200-dirty active · by student · localization@22c7200-dirty</text>
+<text x="51.6" y="463.7" textLength="974.4" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[INFO] [launch]: All log files can be found below /var/log/eurobot/localization/ros/2026-11-16-00-08-49-690434-lapto</text>
+<text x="18" y="481.9" textLength="25.2" lengthAdjust="spacingAndGlyphs" class="tb29425-1">p-7</text>
+<text x="51.6" y="500.1" textLength="478.8" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[INFO] [launch]: Default logging verbosity is set to INFO</text>
+<text x="51.6" y="518.3" textLength="445.2" lengthAdjust="spacingAndGlyphs" class="tb29425-1">[INFO] [fusion_node-1]: process started with pid [52]</text>
+<text x="18" y="536.5" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="tb29425-2">✓</text>
+<text x="26.4" y="536.5" textLength="445.2" lengthAdjust="spacingAndGlyphs" class="tb29425-1"> rollback       localization back on the stable image</text>
+<text x="18" y="554.7" textLength="8.4" lengthAdjust="spacingAndGlyphs" class="tb29425-5">✗</text>
+<text x="26.4" y="554.7" textLength="260.4" lengthAdjust="spacingAndGlyphs" class="tb29425-1"> deploy failed for localization</text>
+<text x="34.8" y="572.9" textLength="571.2" lengthAdjust="spacingAndGlyphs" class="tb29425-3">full log: build/logs/deploy-20261116-000845.log   (or rerun with -v)</text>
+</g>
+<rect x="0.5" y="0.5" width="1043" height="590.8" rx="9.5" fill="none" stroke="#2b2d48"/>
+</svg>

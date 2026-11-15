@@ -1,0 +1,30 @@
+#!/bin/bash
+# Conventional Commits check for the commit-msg git hook (pre-commit installs it:
+#   pre-commit install --hook-type commit-msg).
+#   type(scope)!: subject      e.g. feat(localization): fuse camera pose
+# Merge, revert and fixup!/squash! commits made by git itself are let through.
+set -euo pipefail
+
+msg_file="${1:?usage: commit-msg COMMIT_MSG_FILE}"
+subject="$(sed -e '/^#/d' -e '/^[[:space:]]*$/d' "$msg_file" | head -n 1)"
+
+case "$subject" in
+  "Merge "* | "Revert \""* | "fixup! "* | "squash! "* | "amend! "*) exit 0 ;;
+esac
+
+re='^(feat|fix|docs|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9_/-]+\))?!?: [^ ].{2,}$'
+if [[ "$subject" =~ $re ]] && (( ${#subject} <= 100 )); then
+  exit 0
+fi
+
+cat >&2 <<MSG
+✗ commit message does not follow Conventional Commits:
+    $subject
+
+  format:  type(scope): subject       (subject ≤ 100 chars, scope optional)
+  types:   feat fix docs refactor perf test build ci chore revert
+  example: feat(localization): fuse camera pose into the EKF
+           fix(main): stop waiting for SIMA when it is disabled
+  template: git config commit.template .gitmessage
+MSG
+exit 1

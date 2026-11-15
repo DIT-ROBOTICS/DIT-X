@@ -1,0 +1,500 @@
+/*
+ * DIT-X theme for Material for MkDocs.
+ * Brand ramp: DIT red -> magenta -> violet -> cyan (same as the ditx TUI).
+ * Only custom properties and class-level overrides; no template changes.
+ */
+
+/* ------------------------------------------------------------------ tokens */
+
+:root {
+  --dit-red: #d70000;
+  --dit-magenta: #ff00af;
+  --dit-violet: #875fff;
+  --dit-cyan: #00d7ff;
+  --dit-gradient: linear-gradient(90deg, #d70000, #ff005f, #ff00af, #af5fff,
+      #5f5fff, #00afff, #00d7ff);
+  --dit-gradient-text: linear-gradient(90deg, #ff2d55 0%, #ff00af 35%,
+      #9a6bff 65%, #00d7ff 100%);
+
+  --dit-radius-sm: 0.3rem;
+  --dit-radius: 0.5rem;
+  --dit-radius-lg: 0.75rem;
+}
+
+/* Light scheme */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #ffffff;
+  --md-primary-fg-color--light: #ffffff;
+  --md-primary-fg-color--dark: #f4f5f8;
+  --md-primary-bg-color: #14161d;
+  --md-primary-bg-color--light: rgba(20, 22, 29, 0.6);
+
+  --md-accent-fg-color: #0891b2;
+  --md-accent-fg-color--transparent: rgba(8, 145, 178, 0.1);
+  --md-typeset-a-color: #0e7490;
+
+  --md-default-fg-color: rgba(17, 19, 26, 0.9);
+  --md-default-fg-color--light: rgba(17, 19, 26, 0.62);
+  --md-default-fg-color--lighter: rgba(17, 19, 26, 0.36);
+  --md-default-fg-color--lightest: rgba(17, 19, 26, 0.08);
+
+  --md-code-bg-color: #f6f7f9;
+  --md-code-fg-color: #2b2f3a;
+
+  --md-footer-bg-color: #f6f7f9;
+  --md-footer-bg-color--dark: #eef0f3;
+  --md-footer-fg-color: rgba(17, 19, 26, 0.88);
+  --md-footer-fg-color--light: rgba(17, 19, 26, 0.6);
+  --md-footer-fg-color--lighter: rgba(17, 19, 26, 0.4);
+
+  --dit-border: #e4e6ec;
+  --dit-surface: #fafbfc;
+  --dit-search-bg: #f1f2f5;
+  --dit-header-bg: rgba(255, 255, 255, 0.82);
+  --dit-shadow: 0 1px 2px rgba(16, 24, 40, 0.04),
+    0 1px 3px rgba(16, 24, 40, 0.06);
+  --dit-gradient-text: linear-gradient(90deg, #d70000 0%, #e0007a 35%,
+      #7c3aed 68%, #0891b2 100%);
+
+  /* Mermaid (Material's variables are inherited into the diagram's shadow DOM) */
+  --md-mermaid-node-bg-color: #f1fbfe;
+  --md-mermaid-node-fg-color: #7fd3e6;
+  --md-mermaid-edge-color: #8b92a5;
+  --md-mermaid-label-bg-color: #fafbfc;
+  --md-mermaid-label-fg-color: #1d2130;
+  --md-mermaid-sequence-actor-bg-color: #f1fbfe;
+  --md-mermaid-sequence-note-bg-color: #fdf4ff;
+  --md-mermaid-sequence-note-border-color: #f0abfc;
+  --dit-mermaid-cluster-bg: #f8f9fb;
+  --dit-mermaid-cluster-border: #e1e4eb;
+  --dit-mermaid-cluster-fg: #5b6275;
+}
+
+/* Dark scheme */
+[data-md-color-scheme="slate"] {
+  --md-hue: 228;
+  --md-default-bg-color: #111318;
+  --md-default-bg-color--light: rgba(17, 19, 24, 0.54);
+  --md-default-bg-color--lighter: rgba(17, 19, 24, 0.26);
+  --md-default-bg-color--lightest: rgba(17, 19, 24, 0.07);
+  --md-default-fg-color: rgba(232, 235, 243, 0.88);
+  --md-default-fg-color--light: rgba(232, 235, 243, 0.6);
+  --md-default-fg-color--lighter: rgba(232, 235, 243, 0.34);
+  --md-default-fg-color--lightest: rgba(232, 235, 243, 0.08);
+
+  --md-primary-fg-color: #111318;
+  --md-primary-fg-color--light: #171a21;
+  --md-primary-fg-color--dark: #0c0e12;
+  --md-primary-bg-color: #eef0f6;
+  --md-primary-bg-color--light: rgba(238, 240, 246, 0.6);
+
+  --md-accent-fg-color: #22d3ee;
+  --md-accent-fg-color--transparent: rgba(34, 211, 238, 0.1);
+  --md-typeset-a-color: #3fd8f2;
+
+  --md-code-bg-color: #181b22;
+  --md-code-fg-color: #d5d9e3;
+  --md-footer-bg-color: #0c0e12;
+  --md-footer-bg-color--dark: #08090c;
+
+  --dit-border: rgba(255, 255, 255, 0.08);
+  --dit-surface: #15181f;
+  --dit-search-bg: rgba(255, 255, 255, 0.06);
+  --dit-header-bg: rgba(17, 19, 24, 0.78);
+  --dit-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  --md-mermaid-node-bg-color: #142029;
+  --md-mermaid-node-fg-color: rgba(34, 211, 238, 0.45);
+  --md-mermaid-edge-color: #707890;
+  --md-mermaid-label-bg-color: #15181f;
+  --md-mermaid-label-fg-color: #e3e7f0;
+  --md-mermaid-sequence-actor-bg-color: #142029;
+  --md-mermaid-sequence-note-bg-color: #23182a;
+  --md-mermaid-sequence-note-border-color: rgba(255, 0, 175, 0.4);
+  --dit-mermaid-cluster-bg: rgba(255, 255, 255, 0.025);
+  --dit-mermaid-cluster-border: rgba(255, 255, 255, 0.1);
+  --dit-mermaid-cluster-fg: #a4abbd;
+}
+
+/* ------------------------------------------------------------------ header */
+
+/* The gradient rule under the header is the brand signature: keep it. */
+.md-header {
+  background-color: var(--dit-header-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 2px solid transparent;
+  border-image: var(--dit-gradient) 1;
+  box-shadow: none;
+}
+
+.md-header--shadow {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.md-header__title {
+  font-family: var(--dit-display-font);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* The DIT mark is white; on the light header it is drawn in the text colour. */
+.md-header__button.md-logo img {
+  height: 1.6rem;
+}
+
+[data-md-color-scheme="default"] .md-header__button.md-logo img {
+  filter: brightness(0.12);
+}
+
+.md-tabs {
+  background-color: var(--md-default-bg-color);
+  border-bottom: 1px solid var(--dit-border);
+  color: var(--md-default-fg-color--light);
+}
+
+.md-tabs__link {
+  font-weight: 500;
+  opacity: 1;
+}
+
+.md-tabs__item--active .md-tabs__link,
+.md-tabs__link:hover {
+  color: var(--md-default-fg-color);
+}
+
+.md-tabs__item--active .md-tabs__link {
+  font-weight: 600;
+}
+
+/* Search field: a soft pill in the header, rounded dropdown when open. */
+.md-search__form {
+  border-radius: var(--dit-radius);
+  background-color: var(--dit-search-bg);
+}
+
+.md-search__form:hover {
+  background-color: var(--dit-search-bg);
+  box-shadow: inset 0 0 0 1px var(--dit-border);
+}
+
+@media screen and (min-width: 60em) {
+  [data-md-toggle="search"]:checked ~ .md-header .md-search__form {
+    border-radius: var(--dit-radius) var(--dit-radius) 0 0;
+    background-color: var(--md-default-bg-color);
+  }
+
+  .md-search__output {
+    border-radius: 0 0 var(--dit-radius) var(--dit-radius);
+    overflow: hidden;
+  }
+
+  [data-md-toggle="search"]:checked ~ .md-header .md-search__output {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  }
+}
+
+.md-search-result__link {
+  border-radius: var(--dit-radius-sm);
+}
+
+/* ------------------------------------------------------------- navigation */
+
+@media screen and (min-width: 76.25em) {
+  .md-nav--primary .md-nav__link {
+    border-radius: var(--dit-radius-sm);
+    margin-left: -0.5rem;
+    padding: 0.2rem 0.5rem;
+    margin-top: 0.15rem;
+  }
+
+  .md-nav--primary .md-nav__link--active {
+    background-color: var(--md-accent-fg-color--transparent);
+    font-weight: 600;
+  }
+
+  .md-nav--primary .md-nav__item--section > .md-nav__link {
+    font-weight: 700;
+    color: var(--md-default-fg-color);
+    background: none;
+  }
+}
+
+.md-nav__link--active,
+.md-nav__link:is(:focus, :hover) {
+  color: var(--md-typeset-a-color);
+}
+
+/* ------------------------------------------------------------- typography */
+
+/*
+ * Material scales the root font up on wide screens (137.5% from 1600px, 150%
+ * from 2000px). CJK glyphs already read larger than Latin at the same size, so
+ * keep the 16px body text that GitHub Docs / Vercel / Stripe use at any width.
+ */
+@media screen and (min-width: 100em) {
+  html {
+    font-size: 125%;
+  }
+}
+
+/*
+ * Taiwan typesetting: generous leading for CJK text.
+ * text-spacing-trim stays at the browser default for prose (with a TC font,
+ * centred 。，are not trimmed). In code it is disabled so full-width
+ * punctuation keeps its full advance and columns do not shift.
+ */
+.md-typeset {
+  line-height: 1.8;
+  font-feature-settings: "cv11";
+}
+
+.md-typeset :is(pre, code, kbd) {
+  text-spacing-trim: space-all;
+}
+
+.md-typeset h1 {
+  font-weight: 700;
+  color: var(--md-default-fg-color);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.md-typeset h2 {
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1.4;
+  margin-top: 2.2em;
+}
+
+.md-typeset h3 {
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.md-typeset a {
+  text-underline-offset: 0.2em;
+}
+
+.md-typeset hr {
+  border-bottom-color: var(--dit-border);
+}
+
+/* -------------------------------------------------------------- code */
+
+.md-typeset code {
+  border-radius: var(--dit-radius-sm);
+  font-size: 0.85em;
+}
+
+.md-typeset :not(pre) > code {
+  padding: 0.1em 0.35em;
+  box-shadow: inset 0 0 0 1px var(--dit-border);
+}
+
+.md-typeset pre {
+  border-radius: var(--dit-radius);
+}
+
+.md-typeset pre > code {
+  border-radius: var(--dit-radius);
+  box-shadow: inset 0 0 0 1px var(--dit-border);
+  padding: 0.9em 1.2em;
+  line-height: 1.6;
+}
+
+.md-typeset .highlighttable {
+  border-radius: var(--dit-radius);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--dit-border);
+}
+
+.md-typeset .highlighttable pre > code {
+  box-shadow: none;
+}
+
+.md-typeset .highlight span.filename {
+  border-radius: var(--dit-radius) var(--dit-radius) 0 0;
+  border-bottom: 1px solid var(--dit-border);
+}
+
+.md-typeset .highlight span.filename + pre > code {
+  border-radius: 0 0 var(--dit-radius) var(--dit-radius);
+}
+
+.md-clipboard {
+  border-radius: var(--dit-radius-sm);
+}
+
+.md-typeset kbd {
+  border-radius: var(--dit-radius-sm);
+}
+
+/* -------------------------------------------------------------- admonitions */
+
+.md-typeset :is(.admonition, details) {
+  border-radius: var(--dit-radius);
+  border-width: 1px;
+  border-left-width: 4px;
+  box-shadow: none;
+  overflow: hidden;
+  font-size: 0.7rem;
+}
+
+.md-typeset :is(.admonition-title, summary) {
+  border-radius: 0;
+  font-weight: 600;
+}
+
+.md-typeset details:not([open]) > summary {
+  margin-bottom: 0;
+}
+
+/* -------------------------------------------------------------- tables */
+
+.md-typeset table:not([class]) {
+  border: 1px solid var(--dit-border);
+  border-radius: var(--dit-radius);
+  box-shadow: none;
+  font-size: 0.7rem;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--dit-surface);
+  font-weight: 600;
+  border-bottom: 1px solid var(--dit-border);
+}
+
+.md-typeset table:not([class]) td {
+  border-top: 1px solid var(--dit-border);
+}
+
+.md-typeset table:not([class]) tr:first-child td {
+  border-top: 0;
+}
+
+.md-typeset table:not([class]) tbody tr:hover {
+  background-color: var(--md-accent-fg-color--transparent);
+  box-shadow: none;
+}
+
+/* -------------------------------------------------------------- tabs */
+
+.md-typeset .tabbed-set {
+  border-radius: var(--dit-radius);
+}
+
+.md-typeset .tabbed-labels > label {
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------- buttons, media */
+
+.md-typeset .md-button {
+  border-radius: 999px;
+  border: 1px solid var(--dit-border);
+  color: var(--md-default-fg-color);
+  font-weight: 600;
+  padding: 0.55em 1.4em;
+}
+
+.md-typeset .md-button:is(:focus, :hover) {
+  background-color: var(--md-accent-fg-color--transparent);
+  border-color: var(--md-accent-fg-color);
+  color: var(--md-default-fg-color);
+}
+
+.md-typeset .md-button--primary {
+  background: var(--md-accent-fg-color);
+  border-color: transparent;
+  color: #fff;
+}
+
+.md-typeset img:not(.twemoji):not(.emojione) {
+  border-radius: var(--dit-radius);
+}
+
+/* Terminal shots draw their own rounded window frame; clipping them again
+   cuts into it. */
+.md-typeset img[src*="assets/term/"]:not(.twemoji):not(.emojione) {
+  display: block;
+  border-radius: 0;
+}
+
+.md-top {
+  border-radius: 999px;
+  box-shadow: var(--dit-shadow);
+}
+
+.md-footer {
+  border-top: 1px solid var(--dit-border);
+}
+
+/* -------------------------------------------------------------- diagrams */
+
+/* Each Mermaid diagram sits on a quiet card. The SVG itself is themed by
+   javascripts/mermaid-theme.js plus the --md-mermaid-* variables above. */
+.md-typeset .mermaid {
+  border: 1px solid var(--dit-border);
+  border-radius: var(--dit-radius-lg);
+  background-color: var(--dit-surface);
+  padding: 1.25rem 1rem;
+  margin: 1.5em 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* -------------------------------------------------------------- home hero */
+
+.md-typeset .dit-eyebrow {
+  display: inline-block;
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--dit-border);
+  border-radius: 999px;
+  background-color: var(--dit-surface);
+  color: var(--md-default-fg-color--light);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.md-typeset h1.dit-hero-title {
+  width: fit-content;
+  margin: 0 0 0.6em;
+  font-family: var(--dit-display-font);
+  font-size: 2.8em;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  background: var(--dit-gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.md-typeset h1.dit-hero-title .headerlink {
+  display: none;
+}
+
+.md-typeset h1.dit-hero-title + p {
+  font-size: 1.1em;
+  color: var(--md-default-fg-color--light);
+}
+
+@media screen and (max-width: 44.9375em) {
+  .md-typeset h1.dit-hero-title {
+    font-size: 2em;
+  }
+}
+
+/* footer credit */
+.md-copyright .dit-heart {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.md-copyright:hover .dit-heart {
+  transform: scale(1.25);
+}

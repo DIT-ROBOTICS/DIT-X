@@ -1,0 +1,9 @@
+# keep the build context small: images build from base/, domains/ and docker/ only
+**/.git
+build/
+install/
+log/
+logs/
+.sim-robot/
+_research/
+**/__pycache__

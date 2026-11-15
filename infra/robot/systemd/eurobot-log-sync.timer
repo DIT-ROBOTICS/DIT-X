@@ -1,0 +1,10 @@
+[Unit]
+Description=Copy /home/share/eurobot/logs to the lab NAS every night
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,21 @@
+# Python style for the workspace (domains inherit it). `ditx lint` / `ditx lint --fix`.
+line-length = 100
+# ditx plugins are extensionless Python scripts
+extend-include = ["tools/ext/ditx-*"]
+target-version = "py310"   # Ubuntu 22.04 (Humble, the default); Jazzy has 3.12
+extend-exclude = ["build", "domains/*/build", ".sim-robot"]
+
+[format]
+quote-style = "single"     # same as ROS 2 (ament_flake8 / flake8-quotes)
+
+[lint]
+# pycodestyle, pyflakes, warnings, import order, bugbear, pyupgrade
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[lint.per-file-ignores]
+# launch files and generated contract module: long literal lines are normal
+"**/launch/*.py" = ["E501"]
+"**/test/*.py" = ["B011"]
+
+[lint.isort]
+force-sort-within-sections = true

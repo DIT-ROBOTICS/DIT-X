@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""Compare the live ROS graph with contract.yaml.
+
+Fails (exit 1) when a /robot/* topic is published with a type that differs from
+the contract, or when a /robot/* topic exists that is not registered at all.
+`--require` additionally fails for registered topics nobody publishes.
+
+Run on a robot (inside any domain container):  ros2 run eurobot_common contract_check
+"""
+import argparse
+import os
+import sys
+import time
+
+import rclpy
+import yaml
+from ament_index_python.packages import get_package_share_directory
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
+    ap.add_argument('--wait', type=float, default=3.0, help='seconds of discovery before checking')
+    ap.add_argument('--require', nargs='*', default=[], metavar='TOPIC',
+                    help='topics that must have a publisher (or "all")')
+    a = ap.parse_args()
+
+    path = os.path.join(get_package_share_directory('eurobot_common'), 'contract.yaml')
+    with open(path, encoding='utf-8') as f:
+        c = yaml.safe_load(f)
+    registered = {t['name']: t['type'] for t in c['topics'].values()}
+
+    rclpy.init()
+    node = rclpy.create_node('contract_check')
+    deadline = time.monotonic() + a.wait
+    while time.monotonic() < deadline:
+        rclpy.spin_once(node, timeout_sec=0.1)
+    live = dict(node.get_topic_names_and_types())
+
+    problems = []
+    for name, types in sorted(live.items()):
+        if not name.startswith('/robot/'):
+            continue
+        if name not in registered:
+            problems.append(f'unregistered topic {name} {types}')
+        elif types != [registered[name]]:
+            problems.append(f'type mismatch on {name}: live {types}, contract {registered[name]}')
+    required = list(registered) if a.require == ['all'] else a.require
+    for name in required:
+        if name not in live or not node.get_publishers_info_by_topic(name):
+            problems.append(f'no publisher on {name}')
+
+    for p in problems:
+        print(f'FAIL  {p}')
+    print(f'{"FAIL" if problems else "OK"}    {len(live)} topics checked against {path}')
+    node.destroy_node()
+    rclpy.shutdown()
+    sys.exit(1 if problems else 0)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,53 @@
+# Included by domain repos. A domain repo's whole .gitlab-ci.yml:
+#
+#   include:
+#     - project: dit-robotics/dit-x
+#       ref: develop
+#       file: .gitlab/ci/domain.yml
+#   variables:
+#     DIT_DOMAIN: localization
+#
+# Clones the shell next to this checkout, puts this commit at
+# domains/$DIT_DOMAIN, syncs the other domains, and runs the same stages as the
+# shell pipeline in the dev image of the shell's develop branch.
+# The shell project must allow this project's CI_JOB_TOKEN
+# (Settings → CI/CD → Job token permissions). Runner requirements: see the
+# shell's .gitlab-ci.yml.
+
+variables:
+  DIT_SHELL_PROJECT: dit-robotics/dit-x
+  DIT_SHELL_REF: develop
+  DIT_DEV_TAG: develop
+  FORCE_COLOR: "1"
+
+stages: [test]
+
+ditx-domain-ci:
+  stage: test
+  tags: [ditx]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
+  variables:
+    SHELL_DIR: $CI_BUILDS_DIR/ditx-shell-$CI_JOB_ID
+  script:
+    - test -n "$DIT_DOMAIN" || { echo "set DIT_DOMAIN in the domain repo's .gitlab-ci.yml"; exit 1; }
+    - git clone --depth 1 --branch "$DIT_SHELL_REF"
+        "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${DIT_SHELL_PROJECT}.git" "$SHELL_DIR"
+    - cp -a "$CI_PROJECT_DIR" "$SHELL_DIR/domains/$DIT_DOMAIN"
+    - cd "$SHELL_DIR"
+    - export REGISTRY="$CI_REGISTRY/$DIT_SHELL_PROJECT"
+    - export DIT_DEV_IMAGE="$REGISTRY/eurobot-dev:$DIT_DEV_TAG"
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - others=$(sed -n 's|^  domains/\([^:]*\):.*|\1|p' ditx.repos | grep -vx "$DIT_DOMAIN" || true)
+    - |
+      if [ -n "${DIT_SYNC_TOKEN:-}" ]; then
+        git config --global url."https://x-access-token:${DIT_SYNC_TOKEN}@github.com/".insteadOf https://github.com/
+      fi
+    - if [ -n "$others" ]; then bin/ditx sync $others; fi
+    - docker pull "$DIT_DEV_IMAGE"
+    - bin/ditx ci lint -d "$DIT_DOMAIN"
+    - bin/ditx ci build
+    - bin/ditx ci test
+  after_script:
+    - rm -rf "$CI_BUILDS_DIR/ditx-shell-$CI_JOB_ID"

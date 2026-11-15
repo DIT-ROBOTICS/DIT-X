@@ -1,0 +1,86 @@
+# The interface contract between domains: every topic and service that crosses
+# a domain (container) boundary is registered here, with its type and QoS.
+#
+# This file is the single source of truth. At build time it generates
+#   C++    #include "eurobot_common/contract.hpp"   ->  eurobot_common::contract::LOCALIZATION_POSE
+#   Python from eurobot_common import contract       ->  contract.LOCALIZATION_POSE
+#   Docs   docs/contract.md                          (ditx contract md)
+# and `ditx contract live -r <robot>` compares a running robot against it.
+#
+# Topics used only inside one domain do not belong here.
+# Rules: names are /robot/<area>/<thing> (area = owning domain, or startup/system
+# for cross-cutting topics), snake_case; prefer standard
+# message types; pick a QoS profile below instead of inventing one per topic.
+
+version: 1
+
+domains: [main, navigation, localization, vision]
+
+# QoS profiles (https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Quality-of-Service-Settings.html)
+#   sensor   high-rate streams: keep only the newest sample, never block on retransmits
+#   state    "latest value" topics: late joiners get the last sample immediately
+#   command  commands/events that must not be dropped
+qos:
+  sensor:  {reliability: best_effort, durability: volatile,        history: keep_last, depth: 1}
+  state:   {reliability: reliable,    durability: transient_local, history: keep_last, depth: 1}
+  command: {reliability: reliable,    durability: volatile,        history: keep_last, depth: 10}
+
+topics:
+  STARTUP_STATUS:
+    name: /robot/startup/status
+    type: eurobot_interfaces/msg/StartupStatus
+    qos: state
+    publisher: main
+    subscribers: ["*"]
+    doc: Which domains have reported ready; all_ready gates the match start.
+
+  HEARTBEAT:
+    name: /robot/system/heartbeat
+    type: eurobot_interfaces/msg/ModuleHeartbeat
+    qos: sensor
+    publisher: "*"
+    subscribers: [main]
+    rate_hz: 1
+    doc: One message per module per second; missing heartbeats mean a dead module.
+
+  LOCALIZATION_POSE:
+    name: /robot/localization/pose
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    qos: sensor
+    publisher: localization
+    subscribers: [navigation, main]
+    rate_hz: 50
+    doc: Fused robot pose in the map frame. header.stamp = time of the newest fused measurement.
+
+  VISION_RIVAL_POSES:
+    name: /robot/vision/rival_poses
+    type: geometry_msgs/msg/PoseArray
+    qos: sensor
+    publisher: vision
+    subscribers: [localization, navigation, main]
+    rate_hz: 15
+    doc: Detected opponent robots in the map frame.
+
+  NAVIGATION_GOAL:
+    name: /robot/navigation/goal
+    type: geometry_msgs/msg/PoseStamped
+    qos: command
+    publisher: main
+    subscribers: [navigation]
+    doc: Where main wants the robot to go next.
+
+  NAVIGATION_STATUS:
+    name: /robot/navigation/status
+    type: std_msgs/msg/String
+    qos: state
+    publisher: navigation
+    subscribers: [main]
+    doc: "One of: idle, moving, arrived, blocked."
+
+services:
+  READY_SIGNAL:
+    name: /robot/startup/ready_signal
+    type: eurobot_interfaces/srv/ReadySignal
+    server: main
+    clients: ["*"]
+    doc: Startup handshake; each module calls it once it is ready.
