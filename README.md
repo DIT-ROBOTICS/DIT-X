@@ -72,18 +72,18 @@ commands (`rollback`, `down`, `clean`) ask first; `-y/--yes` skips the question.
 
 ```
 DIT-X/
-├── bin/ditx                     entry point (Python stdlib only)
-├── tools/                      ditx sources, TUI, templates, tests, install.sh, git hooks
-├── base/                       shared ROS packages, baked into every image
-│   ├── eurobot_interfaces/       msgs / srvs used between domains
-│   └── eurobot_common/           contract.yaml (topics + QoS registry) + helpers
-├── docker/                     Dockerfile (base → dev → runtime), bake file, robot compose
-├── config/robots.ini           robots: host, arch, ROS_DOMAIN_ID, what runs, image tag
+├── bin/ditx                 entry point (Python standard library only)
+├── tools/                   ditx sources, TUI, templates, tests, git hooks
+├── base/                    shared ROS packages, baked into every image
+│   ├── eurobot_interfaces/  msgs / srvs used between domains
+│   └── eurobot_common/      contract.yaml (topics + QoS) + helpers
+├── docker/                  Dockerfile, bake file, robot compose, cross/
+├── config/robots.ini        robots: host, arch, domain id, what runs, tag
 ├── ditx.repos               domain repos (vcstool format)
-├── infra/robot/                robot setup: dirs, log retention / NAS sync / syslog export, udev
-├── docs/                       architecture, workflow, logging, middleware, ADRs, onboarding
-├── .github/ .gitlab-ci.yml     CI/CD (both call `ditx ci <stage>`)
-└── domains/                    (git-ignored) domain repos, cloned by `ditx sync`
+├── infra/robot/             robot setup: folders, log timers, udev rules
+├── docs/                    the manual (MkDocs), design notes, ADRs
+├── .github/ .gitlab-ci.yml  CI/CD (both call `ditx ci <stage>`)
+└── domains/                 (git-ignored) domain repos, cloned by `ditx sync`
 ```
 
 ## Read next

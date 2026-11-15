@@ -32,8 +32,10 @@ change it. Standard library only.
 
 import argparse
 import dataclasses
+import difflib
 import getpass
 import glob
+import html
 import os
 import re
 import select
@@ -389,7 +391,8 @@ SHOTS = [
         'app-foxglove-dry-run',
         'ditx -n app foxglove -r sim',
         cols=120,
-        state='any checkout',
+        state='any checkout; the dev image (the interfaces are copied out of it)',
+        needs=('dev-image',),
         docs=(('tutorials/beginner/06-sim-robot.md', '▸ foxglove → robot sim'),),
     ),
     Shot(
@@ -870,6 +873,7 @@ def clean_env(cols, shim_dir, home, extra=None):
         'PYTHONUNBUFFERED': '1',
         'PYTHONIOENCODING': 'utf-8',
         'PYTHONDONTWRITEBYTECODE': '1',
+        'PYTHON_COLORS': '0',  # Python 3.13+ would color argparse help on its own
         'GIT_CONFIG_NOSYSTEM': '1',
         'GIT_CONFIG_GLOBAL': os.path.join(shim_dir, 'gitconfig'),
     }
@@ -884,10 +888,17 @@ def make_shim(tmp, ws_root=ROOT):
     """bin dir with `ditx` -> bin/ditx of ws_root, plus a neutral git identity."""
     d = os.path.join(tmp, 'shim')
     os.makedirs(d, exist_ok=True)
+    # run ditx with this interpreter, not the first python3 on the clean PATH: a newer
+    # system Python (3.13+ colors argparse help) would change every help shot
     link = os.path.join(d, 'ditx')
     if os.path.lexists(link):
         os.remove(link)
-    os.symlink(os.path.join(ws_root, 'bin', 'ditx'), link)
+    with open(link, 'w', encoding='utf-8') as f:
+        f.write(
+            f'#!/bin/sh\nexec {shlex.quote(sys.executable)} '
+            f'{shlex.quote(os.path.join(ws_root, "bin", "ditx"))} "$@"\n'
+        )
+    os.chmod(link, 0o755)
     with open(os.path.join(d, 'gitconfig'), 'w', encoding='utf-8') as f:
         f.write(
             '[user]\n\tname = student\n\temail = student@example.com\n'
@@ -1050,6 +1061,23 @@ def write_or_check(shot, svg, check):
     return True
 
 
+def svg_rows(svg):
+    """The text of a rendered shot, one string per terminal row."""
+    rows = {}
+    for y, text in re.findall(r'<text x="[^"]*" y="([^"]*)"[^>]*>([^<]*)</text>', svg):
+        rows.setdefault(float(y), []).append(html.unescape(text))
+    return [''.join(parts) for _, parts in sorted(rows.items())]
+
+
+def print_text_diff(shot, svg):
+    path = os.path.join(OUT_DIR, shot.id + '.svg')
+    old = svg_rows(open(path, encoding='utf-8').read()) if os.path.exists(path) else []
+    new = svg_rows(svg)
+    diff = list(difflib.unified_diff(old, new, 'committed', 'now', n=1, lineterm=''))
+    for line in diff[:40] or ['  (same text: only colors or positions differ)']:
+        print(f'    {line}', file=sys.stderr)
+
+
 def run_deterministic(shots, check, tmp):
     shim = make_shim(tmp)
     home = os.path.join(tmp, 'home')
@@ -1063,11 +1091,14 @@ def run_deterministic(shots, check, tmp):
         ws = os.path.join(tmp, 'ws-' + shot.id)
         copy_tree(ws)
         rc, raw = capture(shot, ws, shim, home, extra)
-        ok = write_or_check(shot, render(shot, raw, ws), check)
+        svg = render(shot, raw, ws)
+        ok = write_or_check(shot, svg, check)
         shutil.rmtree(ws, ignore_errors=True)
         print(f'{"ok   " if ok else "STALE"} {shot.id}  (exit {rc})', file=sys.stderr)
         if not ok:
             stale.append(shot.id)
+            if check:  # say what differs: a red CI job must be explainable from its log
+                print_text_diff(shot, svg)
     return stale, skipped
 
 
