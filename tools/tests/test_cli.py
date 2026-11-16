@@ -351,5 +351,28 @@ class CompletionTest(unittest.TestCase):
         self.assertEqual(tab[0].split('\t')[0], 'deploy')
 
 
+class CloneUrlTest(unittest.TestCase):
+    URL = 'https://github.com/SeanChangX/Eurobot-Main.git'
+    SSH = 'git@github.com:SeanChangX/Eurobot-Main.git'
+
+    def ws_with_origin(self, origin):
+        ws = mock.Mock()
+        ws.git.return_value = origin
+        return ws
+
+    def test_ssh_shell_clones_domains_over_ssh(self):
+        for origin in (
+            'git@github.com:SeanChangX/DIT-X.git',
+            'ssh://git@github.com/SeanChangX/DIT-X',
+        ):
+            ws = self.ws_with_origin(origin)
+            self.assertEqual(cli.clone_url(ws, self.URL), self.SSH)
+            self.assertEqual(cli.clone_url(ws, self.URL.removesuffix('.git')), self.SSH)
+
+    def test_https_shell_and_ci_keep_the_manifest_url(self):
+        for origin in ('https://github.com/SeanChangX/DIT-X', ''):
+            self.assertEqual(cli.clone_url(self.ws_with_origin(origin), self.URL), self.URL)
+
+
 if __name__ == '__main__':
     unittest.main()

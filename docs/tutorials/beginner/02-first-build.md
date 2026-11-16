@@ -29,6 +29,8 @@ ditx sync
 
 `sync` 會先將 shell repo 快轉（fast-forward）至最新版本，再複製（clone）或快轉每個 domain repo，並安裝 Git hook（用於檢查提交訊息格式）。含有未提交變更的 repo 不會被更動。
 
+`ditx.repos` 中的網址是 https（CI 與機器人以唯讀 token 讀取）；若 shell repo 是用 SSH clone 的，`sync` 也會用 SSH clone domain repo，因此同一把 SSH 金鑰就能 push 每個 repo，不需要另外設定。
+
 !!! tip "只需要自己小組的程式碼"
     可以只取特定 domain，例如 `ditx sync vision`。之後 `build`、`test`、`lint`、`deploy` 預設只處理已同步的 domain，其他小組的程式碼不必下載。
 

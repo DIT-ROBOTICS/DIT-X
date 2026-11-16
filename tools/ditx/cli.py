@@ -1604,6 +1604,20 @@ def repo_overrides(ws, refs):
     return out
 
 
+HTTPS_URL = re.compile(r'^https://([^/]+)/(.+?)(\.git)?$')
+SSH_URL = re.compile(r'^(ssh://)?git@')
+
+
+def clone_url(ws, url):
+    """ditx.repos lists https URLs (CI and robots read them with a token); a workspace
+    cloned over SSH gets the domains over SSH too, so pushing works with the same key."""
+    shell = ws.git(ws.root, 'remote', 'get-url', 'origin')
+    m = HTTPS_URL.match(url)
+    if m and SSH_URL.match(shell or ''):
+        return f'git@{m.group(1)}:{m.group(2)}.git'
+    return url
+
+
 def cmd_sync(ws, args):
     repos = ws.repos()
     if not repos:
@@ -1620,14 +1634,15 @@ def cmd_sync(ws, args):
             continue
         dst = os.path.join(ws.root, path)
         ver = refs.get(name, spec.get('version', ''))
+        url = clone_url(ws, spec['url'])
         task = ui.Task(name)
         if not os.path.isdir(os.path.join(dst, '.git')):
-            task.status(f'cloning {spec["url"]}')
-            run(['git', 'clone', '--quiet', spec['url'], dst], args)
+            task.status(f'cloning {url}')
+            run(['git', 'clone', '--quiet', url, dst], args)
             if ver:
                 run(['git', '-C', dst, 'checkout', '--quiet', ver], args)
             if args.dry_run:
-                task.done(f'would clone {spec["url"]} @ {ver or "default branch"}')
+                task.done(f'would clone {url} @ {ver or "default branch"}')
                 continue
             sha = ws.git(dst, 'rev-parse', '--short', 'HEAD')
             task.done(f'{"cloned":<14}{ver or "default branch"} @ {sha}')
@@ -1636,6 +1651,9 @@ def cmd_sync(ws, args):
             task.skip('uncommitted changes, not touched (commit or stash, then sync again)')
             problems.append(name)
             continue
+        # an earlier https clone of the manifest URL follows the shell repo to SSH
+        if url != spec['url'] and ws.git(dst, 'remote', 'get-url', 'origin') == spec['url']:
+            run(['git', '-C', dst, 'remote', 'set-url', 'origin', url], args)
         task.status('fetching')
         before = ws.git(dst, 'rev-parse', 'HEAD')
         run(['git', '-C', dst, 'fetch', '--quiet', '--tags', 'origin'], args)
