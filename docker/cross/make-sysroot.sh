@@ -29,7 +29,19 @@ mmdebstrap --variant=extract --architectures=arm64 --mode=root --format=director
 find "$sysroot" -type l -lname '/*' -print0 | while IFS= read -r -d '' link; do
   ln -sfnr "$sysroot$(readlink "$link")" "$link"
 done
-# exported CMake configs name system libraries by absolute path (libpython, eigen)
-grep -rlE '/usr/(lib|include)/' "$sysroot/opt/ros" --include='*.cmake' |
-  xargs -r sed -i -E "s#([\";( ]|^)/usr/(lib|include)/#\1$sysroot/usr/\2/#g"
+# exported CMake configs name libraries by absolute path: system ones (libpython, eigen)
+# and ROS ones (nav2 exports /opt/ros/<distro>/lib/libnav2_util_core.so); point both into
+# the sysroot, or the linker picks up this machine's amd64 copies
+grep -rlE '/(usr|opt/ros)/' "$sysroot/opt/ros" --include='*.cmake' |
+  xargs -r sed -i -E -e "s#([\";( ]|^)/usr/(lib|include)/#\1$sysroot/usr/\2/#g" \
+    -e "s#([\";( ]|^)/opt/ros/#\1$sysroot/opt/ros/#g"
+# update-alternatives never ran (packages were only unpacked): recreate the BLAS / LAPACK
+# links that libraries such as armadillo resolve at link time, pointing at the reference
+# implementations the packages ship in their own subdirectories
+lib="$sysroot/usr/lib/aarch64-linux-gnu"
+for name in blas lapack; do
+  for so in "lib$name.so" "lib$name.so.3"; do
+    [[ -e "$lib/$so" || ! -e "$lib/$name/$so" ]] || ln -s "$name/$so" "$lib/$so"
+  done
+done
 du -sh "$sysroot"
