@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Compare the live ROS graph with contract.yaml.
 
-Fails (exit 1) when a /robot/* topic is published with a type that differs from
-the contract, or when a /robot/* topic exists that is not registered at all.
-`--require` additionally fails for registered topics nobody publishes.
+Fails (exit 1) when a /robot/* topic (or a registered firmware/external topic) is published
+with a type that differs from the contract, or when a /robot/* topic exists that is
+not registered at all. The hidden topics of a registered action count as registered.
+`--require` additionally fails for registered topics nobody publishes: `all` = every
+topic that does not need the robot hardware (what the sim integration test can
+expect), `everything` = every registered topic.
 
 Run on a robot (inside any domain container):  ros2 run eurobot_common contract_check
 """
@@ -21,13 +24,22 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--wait', type=float, default=3.0, help='seconds of discovery before checking')
     ap.add_argument('--require', nargs='*', default=[], metavar='TOPIC',
-                    help='topics that must have a publisher (or "all")')
+                    help='topics that must have a publisher, or "all" (except hardware: true) '
+                         'or "everything"')
     a = ap.parse_args()
 
     path = os.path.join(get_package_share_directory('eurobot_common'), 'contract.yaml')
     with open(path, encoding='utf-8') as f:
         c = yaml.safe_load(f)
     registered = {t['name']: t['type'] for t in c['topics'].values()}
+    for act in (c.get('actions') or {}).values():
+        # an action is a set of hidden topics (+ services, not checked here)
+        pkg, _, name = act['type'].split('/')
+        registered[act['name'] + '/_action/feedback'] = f'{pkg}/action/{name}_FeedbackMessage'
+        registered[act['name'] + '/_action/status'] = 'action_msgs/msg/GoalStatusArray'
+    fixed_names = {
+        t['name'] for t in c['topics'].values() if t.get('firmware') or t.get('external')
+    }
 
     rclpy.init()
     node = rclpy.create_node('contract_check')
@@ -38,13 +50,18 @@ def main():
 
     problems = []
     for name, types in sorted(live.items()):
-        if not name.startswith('/robot/'):
+        if not name.startswith('/robot/') and name not in fixed_names:
             continue
         if name not in registered:
             problems.append(f'unregistered topic {name} {types}')
         elif types != [registered[name]]:
             problems.append(f'type mismatch on {name}: live {types}, contract {registered[name]}')
-    required = list(registered) if a.require == ['all'] else a.require
+    if a.require == ['everything']:
+        required = [t['name'] for t in c['topics'].values()]
+    elif a.require == ['all']:
+        required = [t['name'] for t in c['topics'].values() if not t.get('hardware')]
+    else:
+        required = a.require
     for name in required:
         if name not in live or not node.get_publishers_info_by_topic(name):
             problems.append(f'no publisher on {name}')

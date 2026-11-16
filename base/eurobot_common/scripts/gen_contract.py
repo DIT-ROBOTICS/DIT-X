@@ -19,6 +19,11 @@ QOS_KEYS = {
 # rclcpp::QoS method names (`volatile` is a C++ keyword)
 CPP_DURABILITY = {'volatile': 'durability_volatile', 'transient_local': 'transient_local'}
 NAME_RE = re.compile(r'^/robot/[a-z0-9_]+(/[a-z0-9_]+)+$')
+# names fixed by micro-ROS firmware (`firmware: true`) or by a system outside the workspace
+# (`external: true`) only need to be valid ROS names
+FIXED_NAME_RE = re.compile(r'^(/[a-z0-9_]+)+$')
+# not a domain: the micro-ROS boards behind the micro-ROS agent (robots.ini profile firmware)
+FIRMWARE = 'firmware'
 TYPE_RE = re.compile(r'^[a-z0-9_]+/(msg|srv|action)/[A-Z][A-Za-z0-9]*$')
 KEY_RE = re.compile(r'^[A-Z][A-Z0-9_]*$')
 
@@ -42,25 +47,41 @@ def load(path):
     for section, (pub, sub) in (
         ('topics', ('publisher', 'subscribers')),
         ('services', ('server', 'clients')),
+        ('actions', ('server', 'clients')),
     ):
+        kind = {'topics': 'msg', 'services': 'srv', 'actions': 'action'}[section]
         for key, t in (c.get(section) or {}).items():
             where = f'{section}.{key}'
             if not KEY_RE.match(key):
                 fail(f'{where}: key must be UPPER_SNAKE_CASE')
-            if not NAME_RE.match(t.get('name', '')):
-                fail(f'{where}: name must look like /robot/<domain>/<thing>')
+            for flag in ('firmware', 'hardware', 'external'):
+                if not isinstance(t.get(flag, False), bool):
+                    fail(f'{where}: {flag} must be true or false')
+                if flag in t and section != 'topics':
+                    fail(f'{where}: {flag} is only allowed on topics')
+            fw = t.get('firmware', False)
+            fixed = fw or t.get('external', False)
+            if not (FIXED_NAME_RE if fixed else NAME_RE).match(t.get('name', '')):
+                fail(
+                    f'{where}: name must be a valid ROS name'
+                    if fixed
+                    else f'{where}: name must look like /robot/<domain>/<thing>'
+                )
             if t['name'] in names:
                 fail(f'{where}: name {t["name"]} already used by {names[t["name"]]}')
             names[t['name']] = where
-            if not TYPE_RE.match(t.get('type', '')):
-                fail(f'{where}: type must look like pkg/msg/Type')
+            if not TYPE_RE.match(t.get('type', '')) or t['type'].split('/')[1] != kind:
+                fail(f'{where}: type must look like pkg/{kind}/Type')
             if section == 'topics' and t.get('qos') not in c['qos']:
                 fail(f'{where}: qos must be one of {list(c["qos"])}')
-            if t.get(pub) not in who:
-                fail(f'{where}: {pub} must be a domain or "*"')
+            allowed = who | {FIRMWARE} if fw else who
+            if t.get(pub) not in allowed:
+                fail(f'{where}: {pub} must be a domain or "*"' + (' or firmware' if fw else ''))
             for s in t.get(sub, []):
-                if s not in who:
+                if s not in allowed:
                     fail(f'{where}: {sub} entry {s!r} is not a domain')
+            if t.get(pub) == FIRMWARE and not t.get('hardware', False):
+                fail(f'{where}: a topic published by firmware needs hardware: true')
     return c
 
 
@@ -82,6 +103,12 @@ def gen_cpp(c):
         '};',
         '',
         'struct Service',
+        '{',
+        '  const char * name;',
+        '  const char * type;',
+        '};',
+        '',
+        'struct Action',
         '{',
         '  const char * name;',
         '  const char * type;',
@@ -109,6 +136,10 @@ def gen_cpp(c):
     for key, s in c.get('services', {}).items():
         out.append(f'// {s.get("doc", "").strip()}')
         out.append(f'inline constexpr Service {key}{{"{s["name"]}", "{s["type"]}"}};')
+    out.append('')
+    for key, a in c.get('actions', {}).items():
+        out.append(f'// {a.get("doc", "").strip()}')
+        out.append(f'inline constexpr Action {key}{{"{a["name"]}", "{a["type"]}"}};')
     out += [
         '',
         'inline constexpr const char * DOMAINS[] = {'
@@ -160,11 +191,19 @@ def gen_py(c):
         '    type: str',
         '',
         '',
+        '@dataclass(frozen=True)',
+        'class Action:',
+        '    name: str',
+        '    type: str',
+        '',
+        '',
     ]
     for key, t in c.get('topics', {}).items():
         out.append(f'{key} = Topic({t["name"]!r}, {t["type"]!r}, {t["qos"]!r})')
     for key, s in c.get('services', {}).items():
         out.append(f'{key} = Service({s["name"]!r}, {s["type"]!r})')
+    for key, a in c.get('actions', {}).items():
+        out.append(f'{key} = Action({a["name"]!r}, {a["type"]!r})')
     out += ['', 'TOPICS = {t.name: t for t in (' + ', '.join(c.get('topics', {})) + ',)}', '']
     return '\n'.join(out)
 
@@ -197,22 +236,32 @@ def gen_md(c):
         '|---|---|---|---|---|---|---|',
     ]
     for t in c.get('topics', {}).values():
+        notes = [n for n in ('firmware', 'external', 'hardware') if t.get(n)]
+        doc = (f'*({", ".join(notes)})* ' if notes else '') + t.get('doc', '')
         out.append(
             f'| `{t["name"]}` | `{t["type"]}` | {t["qos"]} | {t["publisher"]} | '
-            f'{", ".join(t.get("subscribers", []))} | {t.get("rate_hz", "")} | {t.get("doc", "")} |'
+            f'{", ".join(t.get("subscribers", []))} | {t.get("rate_hz", "")} | {doc} |'
         )
     out += [
         '',
-        '## Services',
-        '',
-        '| name | type | server | clients | description |',
-        '|---|---|---|---|---|',
+        '*firmware*: name fixed by the micro-ROS firmware; `firmware` = the boards behind the '
+        'micro-ROS agent. *external*: name fixed by a system outside this workspace that runs '
+        'on the robot (e.g. a web dashboard). *hardware*: no publisher without the robot '
+        'hardware, so the sim integration test does not require one.',
     ]
-    for s in c.get('services', {}).values():
-        out.append(
-            f'| `{s["name"]}` | `{s["type"]}` | {s["server"]} | '
-            f'{", ".join(s.get("clients", []))} | {s.get("doc", "")} |'
-        )
+    for section, title in (('services', 'Services'), ('actions', 'Actions')):
+        out += [
+            '',
+            f'## {title}',
+            '',
+            '| name | type | server | clients | description |',
+            '|---|---|---|---|---|',
+        ]
+        for s in c.get(section, {}).values():
+            out.append(
+                f'| `{s["name"]}` | `{s["type"]}` | {s["server"]} | '
+                f'{", ".join(s.get("clients", []))} | {s.get("doc", "")} |'
+            )
     return '\n'.join(out) + '\n'
 
 

@@ -15,16 +15,28 @@
 
 ### 如何選擇 QoS
 
-`contract.yaml` 僅提供三種 profile。請從中擇一使用，不要自行組合參數：
+`contract.yaml` 僅提供四種 profile。請從中擇一使用，不要自行組合參數：
 
 | profile | 設定 | 適用情境 | 原因 |
 |---|---|---|---|
 | `sensor` | best_effort · volatile · keep_last 1 | 位置、雷達、偵測、heartbeat | 只需要最新的一筆資料；reliable 會為了重送舊資料而延遲新資料 |
 | `state` | reliable · transient_local · keep_last 1 | 「目前狀態」類，例如 startup status | 較晚啟動的 node 連線後即可取得最後一筆資料 |
 | `command` | reliable · volatile · keep_last 10 | 目標點、任務指令 | 不允許遺失 |
+| `stream` | reliable · volatile · keep_last 10 | 給第三方套件讀的高頻資料，例如給 nav2 的 odometry | nav2 等套件以 reliable 訂閱，best_effort 的 publisher 不會被接收 |
 
 !!! warning "QoS 不相容時將無法接收資料"
     reliable 的 subscriber 無法接收 best_effort publisher 的資料，transient_local 的 subscriber 也無法接收 volatile publisher 的資料。只要雙方都使用 `contract.X.qos()`，即可避免此問題。
+
+### action 與特殊 topic
+
+- **action**：跨 domain 的 action（例如 main 請 navigation 執行 `DockRobot`）登錄在 `actions:` 區段，程式中使用 `contract.NAVIGATION_DOCK.name`。`contract_check` 會把 action 背後的隱藏 topic 視為已登錄。
+- topic 可以加上以下旗標（預設皆為 false）：
+
+| 旗標 | 意思 | 例子 |
+|---|---|---|
+| `firmware: true` | 名稱寫死在 micro-ROS 韌體裡，不受 `/robot/...` 命名規則限制；publisher 或 subscriber 可以寫 `firmware` | `/cmd_vel` |
+| `external: true` | 名稱由機器人上 workspace 以外的系統決定（例如網頁儀表板），不受命名規則限制 | `/game_score` |
+| `hardware: true` | 沒有實體硬體（韌體板、相機、GPU）就不會有 publisher；sim 的整合測試（`--require all`）不要求它，`--require everything` 會要求 | 相機偵測結果 |
 
 ## 前置條件
 
@@ -114,7 +126,8 @@ ditx contract md         # 重新產生 docs/contract.md
 ## 摘要
 
 - 跨 domain 的 topic 一律登錄於 `contract.yaml`，程式中使用自動產生的常數
-- QoS 從 `sensor` / `state` / `command` 中擇一使用
+- QoS 從 `sensor` / `state` / `command` / `stream` 中擇一使用
+- 名稱不由我們決定的 topic 用 `firmware` / `external` 標記，需要實體硬體才有 publisher 的用 `hardware` 標記
 - 修改 `base/` 即修改所有小組共用的介面，請依序執行 `ditx build --base` → `ditx build` → `ditx test --integration`
 
 ## 下一步

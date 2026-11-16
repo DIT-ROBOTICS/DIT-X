@@ -1,4 +1,4 @@
-# The interface contract between domains: every topic and service that crosses
+# The interface contract between domains: every topic, service and action that crosses
 # a domain (container) boundary is registered here, with its type and QoS.
 #
 # This file is the single source of truth. At build time it generates
@@ -11,6 +11,17 @@
 # Rules: names are /robot/<area>/<thing> (area = owning domain, or startup/system
 # for cross-cutting topics), snake_case; prefer standard
 # message types; pick a QoS profile below instead of inventing one per topic.
+#
+# Flags on a topic (all default to false):
+#   firmware: true   the name is fixed in micro-ROS firmware (e.g. /cmd_vel): exempt from
+#                    the naming rule, and `firmware` (the boards behind the micro-ROS agent,
+#                    robots.ini profile `firmware`) may appear as publisher or subscriber
+#   external: true   the name is fixed by a system outside this workspace that runs on the
+#                    robot (e.g. a web dashboard): exempt from the naming rule
+#   hardware: true   no publisher unless the robot hardware is there (firmware boards,
+#                    cameras, a GPU); a firmware publisher needs it. `contract_check
+#                    --require all` (the sim integration test) skips these topics,
+#                    `--require everything` does not
 
 version: 1
 
@@ -20,10 +31,14 @@ domains: [main, navigation, localization, vision]
 #   sensor   high-rate streams: keep only the newest sample, never block on retransmits
 #   state    "latest value" topics: late joiners get the last sample immediately
 #   command  commands/events that must not be dropped
+#   stream   high-rate streams read by third-party nodes that subscribe reliable
+#            (nav2 reads odometry with a reliable subscription, which a best_effort
+#            publisher never matches)
 qos:
   sensor:  {reliability: best_effort, durability: volatile,        history: keep_last, depth: 1}
   state:   {reliability: reliable,    durability: transient_local, history: keep_last, depth: 1}
   command: {reliability: reliable,    durability: volatile,        history: keep_last, depth: 10}
+  stream:  {reliability: reliable,    durability: volatile,        history: keep_last, depth: 10}
 
 topics:
   STARTUP_STATUS:
@@ -84,3 +99,12 @@ services:
     server: main
     clients: ["*"]
     doc: Startup handshake; each module calls it once it is ready.
+
+# Actions: goal/feedback/result between domains, e.g.
+#   NAVIGATION_DOCK:
+#     name: /robot/navigation/dock_robot
+#     type: opennav_docking_msgs/action/DockRobot
+#     server: navigation
+#     clients: [main]
+#     doc: Drive to a dock pose.
+actions: {}
