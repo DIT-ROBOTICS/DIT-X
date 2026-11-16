@@ -700,6 +700,13 @@ def cmd_test(ws, args):
         )
     workers, mj, mem = parse_jobs('auto')
     sh = ['set -o pipefail', 'fail=0', f'export MAKEFLAGS=-j{mj}']
+    # tests talk DDS only to themselves: a private domain on loopback, so a sim or a robot on
+    # the network never mixes in, and extra interfaces (VPN, TUN, docker) cannot stall discovery
+    sh += [
+        'export ROS_DOMAIN_ID=$((RANDOM % 100 + 100))',
+        'export CYCLONEDDS_URI=file:///opt/eurobot/cyclonedds-localhost.xml',
+        'export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST',
+    ]
     sh.append('source /opt/ros/$ROS_DISTRO/setup.bash')
     if args.base:
         # separate dir: testing base must not turn into a local base override for builds
