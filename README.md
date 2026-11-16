@@ -12,8 +12,10 @@ shared interfaces that every team builds on. The team code lives in domain repos
 (`Eurobot-Main`, `Eurobot-Navigation`, `Eurobot-Localization`, `Eurobot-Vision`) that
 `ditx sync` puts under `domains/`.
 
-The repo is season-independent: each year continues on `develop`, and releases are tags
-(`v2027.1.0`). No more `Eurobot-<YEAR>-*` copies.
+The repo is season-independent: each year continues on `develop`, and releases are
+[SemVer](https://semver.org) tags on `main` (`v0.1.0`, `v1.0.0`), derived from the Conventional
+Commits since the last release (`!` → major, `feat` → minor, `fix` → patch). The season goes in
+the release title (e.g. "v1.2.0 — Eurobot 2027 final"). No more `Eurobot-<YEAR>-*` copies.
 
 **Manual (中文教學)**: <https://seanchangx.github.io/DIT-X/>, built from `docs/` by
 `.github/workflows/docs.yml` (enable Pages → Source: GitHub Actions once). Local preview: `ditx docs`.
