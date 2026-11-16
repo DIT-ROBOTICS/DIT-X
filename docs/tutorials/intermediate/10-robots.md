@@ -63,6 +63,9 @@ ditx robot add white --host DIT-2026-11
 | `--profiles` | 所有 domain | 此機器人執行的容器；額外選項包括 `firmware`（micro-ROS agent）與 `monitoring`（netdata） |
 | `--tag` | `stable` | 要執行的 image：`stable`、`develop` 或固定版本 `vX.Y.Z` |
 
+!!! warning "domain id 要和機器人一致"
+    DIT-Scripts 依 hostname 把機器人的 `ROS_DOMAIN_ID` 寫在 `/etc/environment`，網頁儀表板與 robot_status_bridge 都跑在這個 domain。`--domain-id` 可以改成別的值，但 `ditx robot add` 會提示兩者不同；`ditx doctor -r <robot>` 也會比對 `robots.ini` 與機器人上的值，不一致時給出警告與修改方式。兩者不同時，各組的容器會看不到儀表板，且程式不會報錯。
+
 `config/robots.ini` 會新增以下內容：
 
 ```ini

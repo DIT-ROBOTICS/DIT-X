@@ -1183,6 +1183,26 @@ def resolve_host(host, user=None):
     return (f'{login}@{name}' if login else name), (m[2] if m else None)
 
 
+def robot_env_domain_id(host):
+    """ROS_DOMAIN_ID in the robot's /etc/environment (DIT-Scripts: the hostname number),
+    or None when it is unset or the robot does not answer."""
+    r = subprocess.run(
+        [
+            'ssh',
+            '-o',
+            'BatchMode=yes',
+            '-o',
+            'ConnectTimeout=2',
+            host,
+            "sed -n 's/^ROS_DOMAIN_ID=//p' /etc/environment",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    value = r.stdout.strip().strip('"') if r.returncode == 0 else ''
+    return value or None
+
+
 def get_robot(ws, name):
     robots = ws.robots()
     name = name or ws.default_robot()
@@ -1904,6 +1924,11 @@ def cmd_robot(ws, args):
         elif not domain_id.isdigit() or int(domain_id) > 232:
             ui.error(f'--domain-id {domain_id}: a number from 0 to 232')
             return 2
+        elif host_domain and domain_id != host_domain:
+            ui.warn(
+                f'domain id {domain_id} differs from {host_domain}, the ROS_DOMAIN_ID DIT-Scripts '
+                f'gives {host}: the dashboard and robot_status_bridge stay on {host_domain}'
+            )
         clash = [r.name for r in robots.values() if r.domain_id == domain_id]
         if clash:
             ui.warn(f'domain id {domain_id} is also used by {", ".join(clash)}')
@@ -2227,6 +2252,18 @@ def cmd_doctor(ws, args):
                 'off, or on another network?',
                 warn_only=not args.robot,
             )
+            env_id = robot_env_domain_id(r.host) if up else None
+            if env_id:
+                # robots.ini may override it, but the host services DIT-Scripts starts
+                # (dashboard, robot_status_bridge) stay on the system ROS_DOMAIN_ID
+                check(
+                    f'robot {r.name} domain id {r.domain_id}'
+                    + (' = the robot' if env_id == r.domain_id else f', the robot says {env_id}'),
+                    env_id == r.domain_id,
+                    f'set domain_id = {env_id} for [{r.name}] in config/robots.ini, unless '
+                    f'the stack must not see the dashboard',
+                    warn_only=True,
+                )
             if up and ufw_enabled() and not args.json:
                 hint = ufw_hint(r)
                 ui.info(f'ufw is on: if {r.name} topics are missing here, allow its DDS: {hint}')

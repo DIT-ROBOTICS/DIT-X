@@ -246,6 +246,22 @@ class RobotTest(CliTestCase):
             host = Workspace(self.ws.root).robots()['white'].host
         self.assertEqual(host, 'vision@dit-2026-11.local')
 
+    def test_add_warns_when_the_domain_id_differs_from_the_hostname(self):
+        rc, _, err = self.run_cli(
+            'robot', 'add', 'white', '--host', 'DIT-2026-11', '--domain-id', '12'
+        )
+        self.assertEqual(rc, 0, err)
+        self.assertEqual(Workspace(self.ws.root).robots()['white'].domain_id, '12')
+        self.assertIn('differs from 11', err)
+
+    def test_robot_env_domain_id_reads_etc_environment(self):
+        done = mock.Mock(returncode=0, stdout='"11"\n')
+        with mock.patch.object(cli.subprocess, 'run', return_value=done) as run:
+            self.assertEqual(cli.robot_env_domain_id('main@dit-2026-11.local'), '11')
+        self.assertIn('/etc/environment', run.call_args.args[0][-1])
+        with mock.patch.object(cli.subprocess, 'run', return_value=mock.Mock(returncode=255)):
+            self.assertIsNone(cli.robot_env_domain_id('main@dit-2026-11.local'))
+
     def test_add_picks_a_free_domain_id_and_refuses_duplicates(self):
         self.run_cli('robot', 'add', 'a', '--host', 'dit@a')
         self.run_cli('robot', 'add', 'b', '--host', 'dit@b')
