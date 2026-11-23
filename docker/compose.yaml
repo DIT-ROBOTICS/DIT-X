@@ -31,6 +31,8 @@ x-env: &env
   ROBOT: ${ROBOT:-sim}
   EUROBOT_LOG_DIR: /var/log/eurobot
   EUROBOT_ALLOW_SKEW: ${EUROBOT_ALLOW_SKEW:-0}
+  # robot accounts have no passwd entry in the image (HOME=/): keep ~/.ros writable for exec'd tools
+  ROS_HOME: /tmp/ros
 
 services:
   main:

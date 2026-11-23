@@ -26,7 +26,19 @@ def main():
     ap.add_argument('--require', nargs='*', default=[], metavar='TOPIC',
                     help='topics that must have a publisher, or "all" (except hardware: true) '
                          'or "everything"')
+    ap.add_argument('--domains', default='', metavar='D1,D2',
+                    help='check only what these domains own: topics they publish (and "*") '
+                         'and unregistered topics under /robot/<domain>/; default: everything')
     a = ap.parse_args()
+    domains = {d for d in a.domains.split(',') if d}
+
+    def owned(t):
+        return not domains or t.get('publisher') == '*' or t.get('publisher') in domains
+
+    def area(name):
+        # /robot/<area>/<thing> -> <area>; None for top-level names (firmware/external)
+        parts = name.split('/')
+        return parts[2] if name.startswith('/robot/') and len(parts) > 3 else None
 
     path = os.path.join(get_package_share_directory('eurobot_common'), 'contract.yaml')
     with open(path, encoding='utf-8') as f:
@@ -52,14 +64,16 @@ def main():
     for name, types in sorted(live.items()):
         if not name.startswith('/robot/') and name not in fixed_names:
             continue
+        if domains and area(name) not in domains and name not in registered:
+            continue  # someone else's area (another domain, or a stack outside DIT-X)
         if name not in registered:
             problems.append(f'unregistered topic {name} {types}')
         elif types != [registered[name]]:
             problems.append(f'type mismatch on {name}: live {types}, contract {registered[name]}')
     if a.require == ['everything']:
-        required = [t['name'] for t in c['topics'].values()]
+        required = [t['name'] for t in c['topics'].values() if owned(t)]
     elif a.require == ['all']:
-        required = [t['name'] for t in c['topics'].values() if not t.get('hardware')]
+        required = [t['name'] for t in c['topics'].values() if owned(t) and not t.get('hardware')]
     else:
         required = a.require
     for name in required:

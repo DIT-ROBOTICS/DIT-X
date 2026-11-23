@@ -1252,8 +1252,8 @@ class Target:
             # same localhost discovery on every distro (Humble's LOCALHOST_ONLY would not
             # find the tools that join the sim); Jazzy's range setting agrees with it
             'ROS_AUTOMATIC_DISCOVERY_RANGE': 'LOCALHOST' if localhost else 'SUBNET',
-            'CYCLONEDDS_URI': 'file:///opt/eurobot/cyclonedds-'
-            + ('localhost.xml' if localhost else 'xml')[: None if localhost else None],
+            'CYCLONEDDS_URI': 'file:///opt/eurobot/'
+            + ('cyclonedds-localhost.xml' if localhost else 'cyclonedds.xml'),
             'EUROBOT_RUN_DIR': self.run_dir,
             'EUROBOT_LIB_DIR': self.lib_dir,
             'EUROBOT_LOG_DIR': self.log_dir,
@@ -1719,7 +1719,8 @@ def cmd_contract(ws, args):
         r = t.sh(
             t.compose(
                 f'exec -T -e EUROBOT_LOG_DIR= {svc} /opt/eurobot/entrypoint.sh '
-                f'ros2 run eurobot_common contract_check --require all'
+                f'ros2 run eurobot_common contract_check --require all '
+                f'--domains={",".join(robot.profiles)}'
             ),
             check=False,
         )
