@@ -1237,11 +1237,11 @@ class Target:
             f'--env-file {self.home}/.env {rest}'
         )
 
-    def write_stack_files(self):
-        """compose.yaml + .env on the robot, generated from config/robots.ini."""
+    def stack_env(self):
+        """The robot's docker/.env values, from config/robots.ini."""
         r = self.robot
         localhost = r.discovery == 'localhost'
-        env = {
+        return {
             'COMPOSE_PROJECT_NAME': 'eurobot-sim' if r.is_local else 'eurobot',
             'COMPOSE_PROFILES': ','.join(r.profiles),
             'ROBOT': r.name,
@@ -1252,15 +1252,18 @@ class Target:
             # same localhost discovery on every distro (Humble's LOCALHOST_ONLY would not
             # find the tools that join the sim); Jazzy's range setting agrees with it
             'ROS_AUTOMATIC_DISCOVERY_RANGE': 'LOCALHOST' if localhost else 'SUBNET',
-            'CYCLONEDDS_URI': 'file:///opt/eurobot/cyclonedds-'
-            + ('localhost.xml' if localhost else 'xml')[: None if localhost else None],
+            'CYCLONEDDS_URI': 'file:///opt/eurobot/'
+            + ('cyclonedds-localhost.xml' if localhost else 'cyclonedds.xml'),
             'EUROBOT_RUN_DIR': self.run_dir,
             'EUROBOT_LIB_DIR': self.lib_dir,
             'EUROBOT_LOG_DIR': self.log_dir,
         }
+
+    def write_stack_files(self):
+        """compose.yaml + .env on the robot, generated from config/robots.ini."""
         lines = (
             ['# written by ditx from config/robots.ini; local edits are overwritten']
-            + [f'{k}={v}' for k, v in env.items()]
+            + [f'{k}={v}' for k, v in self.stack_env().items()]
             # containers run as the deploying user in the folder's group (docker on a robot)
             + ['EUROBOT_UID=$(id -u)', f'EUROBOT_GID=$(stat -c %g {self.home})']
         )
@@ -1716,13 +1719,21 @@ def cmd_contract(ws, args):
     svc = t.running_service()
     with ui.Task('contract') as task:
         task.status(f'listening to the ROS graph of {robot.name}')
-        r = t.sh(
-            t.compose(
-                f'exec -T -e EUROBOT_LOG_DIR= {svc} /opt/eurobot/entrypoint.sh '
-                f'ros2 run eurobot_common contract_check --require all'
-            ),
-            check=False,
-        )
+
+        def check(flags):
+            return t.sh(
+                t.compose(
+                    f'exec -T -e EUROBOT_LOG_DIR= {svc} /opt/eurobot/entrypoint.sh '
+                    f'ros2 run eurobot_common contract_check --require all{flags}'
+                ),
+                check=False,
+            )
+
+        r = check(f' --domains={",".join(robot.profiles)}')
+        if r.returncode and 'unrecognized arguments' in (r.stdout or '') + (r.stderr or ''):
+            # contract_check ships in the image: one from before --domains checks every domain
+            ui.warn(f'the image on {robot.name} predates --domains: checking every domain')
+            r = check('')
         result = [x for x in r.stdout.splitlines() if x.startswith(('OK', 'FAIL'))]
         if args.dry_run:
             task.status(f'would compare the live graph of {robot.name} with contract.yaml')

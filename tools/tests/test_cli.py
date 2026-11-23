@@ -246,6 +246,36 @@ class RobotTest(CliTestCase):
             host = Workspace(self.ws.root).robots()['white'].host
         self.assertEqual(host, 'vision@dit-2026-11.local')
 
+    def test_stack_env_points_at_an_existing_cyclonedds_config(self):
+        # a subnet robot once got file:///opt/eurobot/cyclonedds-xml and restart-looped
+        self.run_cli('robot', 'add', 'white', '--host', 'DIT-2026-11')
+        ws = Workspace(self.ws.root)
+        args = cli.argparse.Namespace(dry_run=True)
+        uris = {
+            n: cli.Target(ws, r, args).stack_env()['CYCLONEDDS_URI'] for n, r in ws.robots().items()
+        }
+        self.assertEqual(uris['white'], 'file:///opt/eurobot/cyclonedds.xml')
+        self.assertEqual(uris['sim'], 'file:///opt/eurobot/cyclonedds-localhost.xml')
+        for uri in uris.values():  # the image copies docker/cyclonedds*.xml to /opt/eurobot/
+            name = uri.rsplit('/', 1)[1]
+            self.assertTrue(os.path.isfile(os.path.join(ROOT, 'docker', name)), name)
+
+    def test_contract_live_retries_without_domains_on_an_older_image(self):
+        old = cli.subprocess.CompletedProcess(
+            [], 2, 'contract_check: error: unrecognized arguments: --domains=main', ''
+        )
+        ok = cli.subprocess.CompletedProcess([], 0, 'OK    8 topics against contract.yaml', '')
+        with (
+            mock.patch.object(cli.Target, 'running_service', return_value='main'),
+            mock.patch.object(cli.Target, 'sh', side_effect=[old, ok]) as sh,
+        ):
+            rc, _, err = self.run_cli('contract', 'live', '-r', 'sim')
+        self.assertEqual(rc, 0, err)
+        self.assertIn('predates --domains', err)
+        first, second = (c.args[0] for c in sh.call_args_list)
+        self.assertIn('--domains=', first)
+        self.assertNotIn('--domains', second)
+
     def test_add_warns_when_the_domain_id_differs_from_the_hostname(self):
         rc, _, err = self.run_cli(
             'robot', 'add', 'white', '--host', 'DIT-2026-11', '--domain-id', '12'
