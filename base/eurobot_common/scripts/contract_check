@@ -28,7 +28,8 @@ def main():
                          'or "everything"')
     ap.add_argument('--domains', default='', metavar='D1,D2',
                     help='check only what these domains own: topics they publish (and "*") '
-                         'and unregistered topics under /robot/<domain>/; default: everything')
+                         'and unregistered topics in their areas (/robot/<area>/, owners from '
+                         'contract.yaml, plus /robot/<domain>/); default: everything')
     a = ap.parse_args()
     domains = {d for d in a.domains.split(',') if d}
 
@@ -60,11 +61,21 @@ def main():
         rclpy.spin_once(node, timeout_sec=0.1)
     live = dict(node.get_topic_names_and_types())
 
+    # who owns each /robot/<area>/ (startup -> main, system -> *); a domain also owns its own
+    # name, so a new topic under /robot/<domain>/ is caught before it is registered
+    area_owners = {}
+    for t in c['topics'].values():
+        area_owners.setdefault(area(t['name']), set()).add(t.get('publisher'))
+
+    def mine(name):
+        owners = area_owners.get(area(name), set()) | {area(name)}
+        return '*' in owners or bool(owners & domains)
+
     problems = []
     for name, types in sorted(live.items()):
         if not name.startswith('/robot/') and name not in fixed_names:
             continue
-        if domains and area(name) not in domains and name not in registered:
+        if domains and name not in registered and not mine(name):
             continue  # someone else's area (another domain, or a stack outside DIT-X)
         if name not in registered:
             problems.append(f'unregistered topic {name} {types}')
