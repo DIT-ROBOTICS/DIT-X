@@ -118,12 +118,13 @@ qos:
   sensor:  {reliability: best_effort, durability: volatile,        history: keep_last, depth: 1}
   state:   {reliability: reliable,    durability: transient_local, history: keep_last, depth: 1}
   command: {reliability: reliable,    durability: volatile,        history: keep_last, depth: 10}
+  stream:  {reliability: reliable,    durability: volatile,        history: keep_last, depth: 10}
 
 topics:
   LOCALIZATION_POSE:
     name: /robot/localization/pose
-    type: geometry_msgs/msg/PoseWithCovarianceStamped
-    qos: sensor
+    type: nav_msgs/msg/Odometry
+    qos: stream
     publisher: localization
     subscribers: [navigation, main]
     rate_hz: 50
@@ -133,7 +134,7 @@ topics:
 | 欄位 | 說明 |
 |---|---|
 | `domains` | 系統可識別的 domain；啟動交握會拒絕不在此清單中的 domain |
-| `qos` | 三種 QoS profile；每個 topic 必須從中選用一種，請勿自行定義 |
+| `qos` | 四種 QoS profile；每個 topic 必須從中選用一種，請勿自行定義 |
 | `topics.<KEY>` | KEY 會成為程式中的常數：`contract.LOCALIZATION_POSE` / `eurobot_common::contract::LOCALIZATION_POSE` |
 | `name` | 格式為 `/robot/<區域>/<東西>`，使用 snake_case；區域為擁有該 topic 的 domain，或 `startup` / `system` |
 | `type` | message 型別，請盡量使用標準型別 |
