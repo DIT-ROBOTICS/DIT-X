@@ -1,7 +1,7 @@
 # docker buildx bake -f docker/docker-bake.hcl [target]
 # Normally driven by `ditx image` / CI, which set the variables below.
 
-variable "REGISTRY"   { default = "ghcr.io/seanchangx" }
+variable "REGISTRY"   { default = "ghcr.io/dit-robotics" }
 variable "TAG"        { default = "local" }
 variable "ROS_DISTRO" { default = "humble" }
 variable "PLATFORMS"  { default = "linux/amd64" }
@@ -26,8 +26,8 @@ function "labels" {
   result = {
     "org.opencontainers.image.title"       = title
     "org.opencontainers.image.description" = description
-    "org.opencontainers.image.source"      = "https://github.com/SeanChangX/DIT-X"
-    "org.opencontainers.image.url"         = "https://seanchangx.github.io/DIT-X/"
+    "org.opencontainers.image.source"      = "https://github.com/DIT-ROBOTICS/DIT-X"
+    "org.opencontainers.image.url"         = "https://dit-robotics.github.io/DIT-X/"
     "org.opencontainers.image.licenses"    = "MIT"
     "org.opencontainers.image.version"     = TAG
     "org.opencontainers.image.revision"    = REVISION

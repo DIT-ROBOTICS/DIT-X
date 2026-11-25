@@ -1014,7 +1014,7 @@ def run_tmux(cmd, cwd, env, cols, rows, keys, timeout=60):
 
 def dev_image_present(env):
     tag = env.get('DIT_DEV_TAG') or os.environ.get('DIT_DEV_TAG') or 'develop'
-    image = f'ghcr.io/seanchangx/eurobot-dev:{tag}'
+    image = f'ghcr.io/dit-robotics/eurobot-dev:{tag}'
     r = subprocess.run(['docker', 'image', 'inspect', image], capture_output=True)
     return r.returncode == 0
 
@@ -1288,7 +1288,7 @@ def main(argv=None):
     p.add_argument('--branch', default='develop', help='--prepare: branch to clone')
     p.add_argument(
         '--cleaner-image',
-        default='ghcr.io/seanchangx/eurobot-dev:local',
+        default='ghcr.io/dit-robotics/eurobot-dev:local',
         help='--teardown: image used to delete root-owned files',
     )
     p.add_argument(

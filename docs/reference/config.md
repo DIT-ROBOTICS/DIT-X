@@ -74,7 +74,7 @@ tag = stable
 ```bash
 # Defaults for ditx. Copy to .env (git-ignored) or run `ditx init` to change them.
 ROS_DISTRO=humble
-REGISTRY=ghcr.io/seanchangx
+REGISTRY=ghcr.io/dit-robotics
 # dev image tag: develop (default) = pull the image CI publishes from the develop branch;
 # local = built on this machine by `ditx image` (after changing the Dockerfile or dependencies)
 DIT_DEV_TAG=develop
@@ -89,7 +89,7 @@ DIT_ROBOT_USER=main
 | 變數 | 預設 | 說明 |
 |---|---|---|
 | `ROS_DISTRO` | `humble` | `humble`（機器人使用的版本）或 `jazzy`（未來支援） |
-| `REGISTRY` | `ghcr.io/seanchangx` | image 名稱的前綴（目前 image 只在本機建置，不會下載） |
+| `REGISTRY` | `ghcr.io/dit-robotics` | image 名稱的前綴（目前 image 只在本機建置，不會下載） |
 | `DIT_DEV_TAG` | `develop` | dev 與 cross image 的 tag：`develop` 使用 CI 發佈到 GHCR 的 image（自動 pull）；`local` 使用在本機以 `ditx image` 建置的 image，修改 Dockerfile 或相依套件時使用 |
 | `DIT_DEV_IMAGE` | | 直接指定完整的 dev image 名稱（覆寫上述兩項） |
 | `DIT_ROBOT` | `sim` | 未指定 `-r` 時使用的機器人 |

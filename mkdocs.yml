@@ -4,9 +4,9 @@
 
 site_name: DIT-X Docs
 site_description: DIT Robotics Eurobot 工作區（ditx）教學與參考文件
-site_url: https://seanchangx.github.io/DIT-X/
-repo_url: https://github.com/SeanChangX/DIT-X
-repo_name: SeanChangX/DIT-X
+site_url: https://dit-robotics.github.io/DIT-X/
+repo_url: https://github.com/DIT-ROBOTICS/DIT-X
+repo_name: DIT-ROBOTICS/DIT-X
 edit_uri: edit/develop/docs/
 copyright: >-
   © 2026 DIT Robotics · MIT License ·

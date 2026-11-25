@@ -38,19 +38,19 @@ services:
   main:
     <<: *ros
     profiles: [main]
-    image: ${REGISTRY:-ghcr.io/seanchangx}/eurobot-main:${TAG:-stable}
+    image: ${REGISTRY:-ghcr.io/dit-robotics}/eurobot-main:${TAG:-stable}
     environment: {<<: *env, EUROBOT_CONTAINER: main}
 
   navigation:
     <<: *ros
     profiles: [navigation]
-    image: ${REGISTRY:-ghcr.io/seanchangx}/eurobot-navigation:${TAG:-stable}
+    image: ${REGISTRY:-ghcr.io/dit-robotics}/eurobot-navigation:${TAG:-stable}
     environment: {<<: *env, EUROBOT_CONTAINER: navigation}
 
   localization:
     <<: *ros
     profiles: [localization]
-    image: ${REGISTRY:-ghcr.io/seanchangx}/eurobot-localization:${TAG:-stable}
+    image: ${REGISTRY:-ghcr.io/dit-robotics}/eurobot-localization:${TAG:-stable}
     environment: {<<: *env, EUROBOT_CONTAINER: localization}
     # real sensors: uncomment and use the udev symlinks from infra/robot/udev
     # devices: ["/dev/dit-lidar:/dev/dit-lidar", "/dev/dit-imu:/dev/dit-imu"]
@@ -58,7 +58,7 @@ services:
   vision:
     <<: *ros
     profiles: [vision]
-    image: ${REGISTRY:-ghcr.io/seanchangx}/eurobot-vision:${TAG:-stable}
+    image: ${REGISTRY:-ghcr.io/dit-robotics}/eurobot-vision:${TAG:-stable}
     environment: {<<: *env, EUROBOT_CONTAINER: vision}
     # cameras: device_cgroup_rules: ["c 81:* rmw", "c 189:* rmw"] + /dev:/dev
 

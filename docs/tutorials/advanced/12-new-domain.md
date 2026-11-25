@@ -25,14 +25,14 @@
 ## 前置條件
 
 - 已完成 [11 修改共用介面](11-interfaces.md)
-- 能在 repo 擁有者的帳號下建立 repo（目前是 `SeanChangX`；沒有權限時，請擁有者代為建立並邀請你）
+- 能在 `DIT-ROBOTICS` 組織下建立 repo（沒有權限時，請組織 admin 代為建立並邀請你）
 
 ## 步驟
 
 ### 1. 建立 repo
 
 ```bash
-gh repo create SeanChangX/Eurobot-Arm --private --clone
+gh repo create DIT-ROBOTICS/Eurobot-Arm --private --clone
 cd Eurobot-Arm
 git switch -c develop
 ```
@@ -44,7 +44,7 @@ git switch -c develop
 ```yaml
   domains/arm:
     type: git
-    url: https://github.com/SeanChangX/Eurobot-Arm.git
+    url: https://github.com/DIT-ROBOTICS/Eurobot-Arm.git
     version: develop
 ```
 

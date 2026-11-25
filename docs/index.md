@@ -20,7 +20,7 @@ flowchart TB
 ## 快速開始
 
 ```bash
-git clone https://github.com/SeanChangX/DIT-X.git && cd DIT-X
+git clone https://github.com/DIT-ROBOTICS/DIT-X.git && cd DIT-X
 ./install.sh            # ditx 上 PATH、Tab 補全
 ditx sync && ditx build && ditx test --integration
 ```
