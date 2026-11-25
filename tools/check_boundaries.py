@@ -3,7 +3,9 @@
 
 1. a domain may depend on base packages and ROS/system packages, never on a
    package of another domain (talk through topics in contract.yaml instead);
-2. every package name starts with its domain name (unique across repos);
+2. every package name starts with its domain name (unique across repos),
+   except vendored upstream code under a `third_party/` directory (drivers without
+   a rosdep key keep their upstream name), which must still be unique across domains;
 3. every domain has <domain>_bringup with launch/bringup.launch.py.
 
 usage: check_boundaries.py WORKSPACE_ROOT DOMAIN...
@@ -30,20 +32,33 @@ def packages(root):
     return out
 
 
+THIRD_PARTY = 'third_party'
+
+
+def vendored(path, domain_root):
+    return THIRD_PARTY in os.path.relpath(path, domain_root).split(os.sep)
+
+
 def main():
     root, domains = sys.argv[1], sys.argv[2:]
     owner = {}
     per_domain = {}
+    errors = []
     for d in domains:
         per_domain[d] = packages(os.path.join(root, 'domains', d))
         for p in per_domain[d]:
+            if p in owner and owner[p] != d:
+                errors.append(f'package {p} exists in both domains {owner[p]} and {d}')
             owner[p] = d
-    errors = []
     for d, pkgs in per_domain.items():
+        domain_root = os.path.join(root, 'domains', d)
         for name, (path, deps) in pkgs.items():
             rel = os.path.relpath(path, root)
-            if not name.startswith(d + '_'):
-                errors.append(f'{rel}: package {name} must be prefixed with "{d}_"')
+            if not name.startswith(d + '_') and not vendored(path, domain_root):
+                errors.append(
+                    f'{rel}: package {name} must be prefixed with "{d}_" '
+                    f'(vendored upstream code goes under {THIRD_PARTY}/)'
+                )
             for dep in sorted(deps):
                 if owner.get(dep, d) != d:
                     errors.append(
