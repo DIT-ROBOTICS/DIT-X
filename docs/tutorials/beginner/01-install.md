@@ -61,7 +61,7 @@ git config --global user.email "you@example.com"
 ### 3. 取得工作區並安裝 `ditx`
 
 ```bash
-git clone git@github.com:SeanChangX/DIT-X.git && cd DIT-X
+git clone git@github.com:DIT-ROBOTICS/DIT-X.git && cd DIT-X
 ./install.sh
 exec $SHELL          # 重開 shell，讓 PATH 與 Tab 補全生效
 ```

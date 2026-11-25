@@ -431,15 +431,15 @@ class CloneUrlTest(unittest.TestCase):
 
     def test_ssh_shell_clones_domains_over_ssh(self):
         for origin in (
-            'git@github.com:SeanChangX/DIT-X.git',
-            'ssh://git@github.com/SeanChangX/DIT-X',
+            'git@github.com:DIT-ROBOTICS/DIT-X.git',
+            'ssh://git@github.com/DIT-ROBOTICS/DIT-X',
         ):
             ws = self.ws_with_origin(origin)
             self.assertEqual(cli.clone_url(ws, self.URL), self.SSH)
             self.assertEqual(cli.clone_url(ws, self.URL.removesuffix('.git')), self.SSH)
 
     def test_https_shell_and_ci_keep_the_manifest_url(self):
-        for origin in ('https://github.com/SeanChangX/DIT-X', ''):
+        for origin in ('https://github.com/DIT-ROBOTICS/DIT-X', ''):
             self.assertEqual(cli.clone_url(self.ws_with_origin(origin), self.URL), self.URL)
 
 

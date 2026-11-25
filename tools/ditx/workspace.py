@@ -142,7 +142,7 @@ class Workspace:
 
     @property
     def registry(self):
-        return self.setting('REGISTRY', 'ghcr.io/seanchangx')
+        return self.setting('REGISTRY', 'ghcr.io/dit-robotics')
 
     def dev_image(self):
         return (

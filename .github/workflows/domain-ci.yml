@@ -1,11 +1,11 @@
 # Reusable pipeline for domain repos (Eurobot-Main, Eurobot-Localization, ...).
 # A domain repo's whole CI is:
 #
-#   # .github/workflows/ci.yml in SeanChangX/Eurobot-Localization
+#   # .github/workflows/ci.yml in a domain repo, e.g. Eurobot-Localization
 #   on: {pull_request: {}, push: {branches: [develop, main]}}
 #   jobs:
 #     ci:
-#       uses: SeanChangX/DIT-X/.github/workflows/domain-ci.yml@develop
+#       uses: DIT-ROBOTICS/DIT-X/.github/workflows/domain-ci.yml@develop
 #       with: {domain: localization}
 #       secrets: inherit
 #
@@ -23,7 +23,7 @@ on:
         required: true
         type: string
       shell-ref:
-        description: Branch/tag of SeanChangX/DIT-X to test against
+        description: Branch/tag of DIT-ROBOTICS/DIT-X to test against
         required: false
         type: string
         default: develop
@@ -55,15 +55,15 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     env:
-      DIT_DEV_IMAGE: ghcr.io/seanchangx/eurobot-dev:ci
+      DIT_DEV_IMAGE: ghcr.io/dit-robotics/eurobot-dev:ci
       DIT_BAKE_CACHE: type=gha,scope=domain-dev
       DOMAIN: ${{ inputs.domain }}
     steps:
-      - name: Checkout shell (SeanChangX/DIT-X @ ${{ inputs.shell-ref }})
+      - name: Checkout shell (DIT-ROBOTICS/DIT-X @ ${{ inputs.shell-ref }})
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          repository: SeanChangX/DIT-X
+          repository: DIT-ROBOTICS/DIT-X
           ref: ${{ inputs.shell-ref }}
           token: ${{ secrets.DIT_SYNC_TOKEN || github.token }}
       - name: Checkout this domain into domains/${{ inputs.domain }}

@@ -7,8 +7,8 @@
            DIT-X · Eurobot workspace · build, test, deploy
 ```
 
-[![CI](https://github.com/SeanChangX/DIT-X/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/SeanChangX/DIT-X/actions/workflows/ci.yml)
-[![Docs](https://github.com/SeanChangX/DIT-X/actions/workflows/docs.yml/badge.svg?branch=develop)](https://seanchangx.github.io/DIT-X/)
+[![CI](https://github.com/DIT-ROBOTICS/DIT-X/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/DIT-ROBOTICS/DIT-X/actions/workflows/ci.yml)
+[![Docs](https://github.com/DIT-ROBOTICS/DIT-X/actions/workflows/docs.yml/badge.svg?branch=develop)](https://dit-robotics.github.io/DIT-X/)
 [![ROS 2 Humble | Jazzy](https://img.shields.io/badge/ROS%202-Humble%20%7C%20Jazzy-22314E?logo=ros)](https://docs.ros.org/en/humble/)
 [![Docker](https://img.shields.io/badge/runs%20in-Docker-2496ED?logo=docker&logoColor=white)](docker/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -25,7 +25,7 @@ The repo is season-independent: each year continues on `develop`, and releases a
 Commits since the last release (`!` → major, `feat` → minor, `fix` → patch). The season goes in
 the release title (e.g. "v1.2.0 — Eurobot 2027 final"). No more `Eurobot-<YEAR>-*` copies.
 
-**Manual (中文教學)**: <https://seanchangx.github.io/DIT-X/>, built from `docs/` by
+**Manual (中文教學)**: <https://dit-robotics.github.io/DIT-X/>, built from `docs/` by
 `.github/workflows/docs.yml` (enable Pages → Source: GitHub Actions once). Local preview: `ditx docs`.
 
 ## Quick start
@@ -34,7 +34,7 @@ Requirements: Linux with **git**, **python3**, **Docker** (with compose and buil
 goes on the host. ROS, compilers and linters all live in images.
 
 ```bash
-git clone https://github.com/SeanChangX/DIT-X.git && cd DIT-X
+git clone https://github.com/DIT-ROBOTICS/DIT-X.git && cd DIT-X
 ./install.sh               # first: puts `ditx` on PATH + Tab completion (undo: --uninstall)
 ditx init                  # your team account on the robots, default robot, ROS distro
 ditx doctor                # checks docker, disk, RAM budget, install, robots
@@ -105,17 +105,13 @@ DIT-X/
 
 ## Moving the repos
 
-The five repos live in a personal account for now (`SeanChangX`). To move them to an
-organization or to GitLab, transfer them and replace the owner in one go:
+The shell repo lives in the `DIT-ROBOTICS` organization; its images go to `ghcr.io/dit-robotics`.
+The domain repos in `ditx.repos` are still in a personal account (`SeanChangX`): the organization
+already has older repos named `Eurobot-Main` and `Eurobot-Localization`, so the domain repos
+move once their names are settled. Then point `ditx.repos` at them and, in every domain repo, the
+reusable workflow (`uses: DIT-ROBOTICS/DIT-X/...`), and set the teams in `CODEOWNERS`.
 
-```bash
-git grep -lE 'SeanChangX/(DIT-X|Eurobot-)|ghcr\.io/seanchangx|seanchangx\.github\.io' |
-  xargs sed -i -E -e 's#SeanChangX/(DIT-X|Eurobot-)#<org>/\1#g' \
-    -e 's#ghcr\.io/seanchangx#ghcr.io/<org>#g' -e 's#seanchangx\.github\.io#<org>.github.io#g'
-```
-
-Run it in every domain repo too, then set the teams in `CODEOWNERS`. With a
-registry available, CI can publish images again (see the header of `.github/workflows/ci.yml`).
+ROS2X (`ditx app`) still comes from `SeanChangX/ROS2X` (`ghcr.io/seanchangx/ros2x`).
 
 ## Credits
 

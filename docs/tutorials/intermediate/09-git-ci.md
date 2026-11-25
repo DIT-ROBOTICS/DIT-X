@@ -18,7 +18,7 @@ flowchart LR
 - **tag `vX.Y.Z`**：正式發行版本。在 release commit 上固定 `ditx.repos` 中的版本；shell repo 的 tag 加上該檔案，即構成整台機器人的完整軟體。
   版本號遵循 [SemVer](https://semver.org)，由上一版之後的 Conventional Commits 決定：有 `!`（破壞相容）升主版號，有 `feat` 升次版號，只有 `fix` 升修補版號。第一版是 `v0.1.0`；`0.x` 代表介面仍可能變動，跑完一整個賽季且介面穩定後再發 `v1.0.0`。賽季寫在 release 標題，例如「v1.2.0 — Eurobot 2027 決賽版」。
 
-每個 domain 都是獨立的 domain repo，例如 `Eurobot-Main`、`Eurobot-Vision` 等，但 CI 邏輯全部集中在 shell repo：domain repo 的 `.github/workflows/ci.yml` 只有一行 `uses: SeanChangX/DIT-X/.github/workflows/domain-ci.yml@develop`，因此所有 domain 都使用相同的檢查方式。
+每個 domain 都是獨立的 domain repo，例如 `Eurobot-Main`、`Eurobot-Vision` 等，但 CI 邏輯全部集中在 shell repo：domain repo 的 `.github/workflows/ci.yml` 只有一行 `uses: DIT-ROBOTICS/DIT-X/.github/workflows/domain-ci.yml@develop`，因此所有 domain 都使用相同的檢查方式。
 
 ## 前置條件
 

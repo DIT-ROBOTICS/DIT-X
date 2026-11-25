@@ -17,7 +17,7 @@
     sudo usermod -aG docker $USER
     ```
 
-??? question "`dev image ghcr.io/seanchangx/eurobot-dev:local is not built yet`"
+??? question "`dev image ghcr.io/dit-robotics/eurobot-dev:local is not built yet`"
     你設定了 `DIT_DEV_TAG=local`（使用自己建置的 image），但還沒建置。建置一次即可（約 5–10 分鐘）：
 
     ```bash

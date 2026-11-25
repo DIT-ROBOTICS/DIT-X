@@ -37,7 +37,7 @@ Kind: **det** = deterministic, regenerated and drift-checked in CI
 | `reference/commands.md` | 664 | `usage: ditx tui [flags]` | `help-tui.svg` (det) |
 | `reference/commands.md` | 680 | `usage: ditx completion SHELL [flags]` | `help-completion.svg` (det) |
 | `tutorials/advanced/15-cpp.md` | 31 | `localization_beacons/` | — (file tree, not command output) |
-| `tutorials/beginner/02-first-build.md` | 56 | `▸ images  humble · linux/amd64 → ghcr.io/seanchangx/eurobot-*:local` | — (rebuilds the shared :local images) |
+| `tutorials/beginner/02-first-build.md` | 63 | `▸ images  humble · linux/amd64 → ghcr.io/dit-robotics/eurobot-*:local` | — (rebuilds the shared :local images) |
 | `tutorials/beginner/04-first-package.md` | 42 | `domains/vision/src/vision_hello/` | — (file tree) |
 | `tutorials/beginner/04-first-package.md` | 195 | `data: 'hello #4 from vision'` | — (ros2 output) |
 

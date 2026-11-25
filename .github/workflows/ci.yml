@@ -21,10 +21,10 @@ permissions:
   contents: read
 
 env:
-  REGISTRY: ghcr.io/seanchangx
+  REGISTRY: ghcr.io/dit-robotics
   # CI jobs build the dev image from THIS commit and run every stage inside it
-  DIT_DEV_IMAGE: ghcr.io/seanchangx/eurobot-dev:ci
-  DIT_CROSS_IMAGE: ghcr.io/seanchangx/eurobot-cross:ci
+  DIT_DEV_IMAGE: ghcr.io/dit-robotics/eurobot-dev:ci
+  DIT_CROSS_IMAGE: ghcr.io/dit-robotics/eurobot-cross:ci
   DIT_BAKE_CACHE: type=gha
   FORCE_COLOR: '1'
 
