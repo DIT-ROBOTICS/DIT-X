@@ -914,7 +914,9 @@ def count_files(ws, targets):
     extra = ('docker', 'infra', '.github')
     for t in [*targets, *extra]:
         for dirpath, dirnames, files in os.walk(os.path.join(ws.root, t)):
-            dirnames[:] = [d for d in dirnames if d != 'build' and not d.startswith('.')]
+            dirnames[:] = [
+                d for d in dirnames if d not in ('build', 'third_party') and not d.startswith('.')
+            ]
             if t not in extra:
                 cpp += sum(f.endswith(('.cpp', '.hpp', '.h', '.cc')) for f in files)
             shf += sum(f.endswith('.sh') or dirpath.endswith('tools/shell') for f in files)
@@ -968,12 +970,12 @@ def cmd_lint(ws, args):
     paths = ' '.join(shlex.quote(p) for p in lint_targets(ws, domains))
     fix = args.fix
     find_cpp = (
-        f"find {paths} -path '*/build' -prune -o -type f "
+        f"find {paths} \\( -path '*/build' -o -path '*/third_party' \\) -prune -o -type f "
         "\\( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.cc' \\) -print"
     )
     find_sh = (  # + the shell rc of `ditx shell` and the root install.sh
         f'find {paths} {ws.root}/docker {ws.root}/infra {ws.root}/.github {ws.root}/install.sh '
-        "-path '*/build' "
+        "\\( -path '*/build' -o -path '*/third_party' \\) "
         "-prune -o -type f \\( -name '*.sh' -o -path '*tools/shell/*' \\) -print"
     )
     gen = f'{ws.root}/base/eurobot_common/scripts/gen_contract.py'
@@ -1005,8 +1007,9 @@ def cmd_lint(ws, args):
     sh.append(
         section_sh(
             'ruff',
-            f'ruff check --output-format concise {"--fix " if fix else ""}{paths} && '
-            f'ruff format {"" if fix else "--check "}{paths}',
+            # format even when `check --fix` leaves problems, so --fix does all it can
+            f'ruff check --output-format concise {"--fix " if fix else ""}{paths}; rc=$?; '
+            f'ruff format {"" if fix else "--check "}{paths} && [ $rc -eq 0 ]',
             stop=False,
         )
     )
